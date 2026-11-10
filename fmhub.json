@@ -4,6 +4,7 @@
   "kinds": [
     "synth"
   ],
+  "cheat": "https://github.com/CaptainChronosis/XENOLITH/blob/main/docs/OPERATOR_MANUAL.md",
   "image": "docs/card.png",
   "color": "#C76050"
 }
