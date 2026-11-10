@@ -37,7 +37,7 @@ Put a new image under `docs/`, then use a relative Markdown link:
 
 ```markdown
 ![Xenolith on the FM-1](docs/xenolith-device.jpg)
-[Playing guide](docs/PLAY.md)
+[Operator's Manual](docs/OPERATOR_MANUAL.md)
 [Installation](INSTALL.md)
 ```
 
@@ -198,7 +198,7 @@ Before publishing, check this short list:
 - The release tag contains the complete buildable source and component notices.
 - The attached firmware matches the package hash in `evidence/BUILD.json`.
 - The same candidate has the required real-device entry and outgoing-update tests.
-- `README.md`, `INSTALL.md` and `docs/PLAY.md` describe that candidate's controls.
+- `README.md`, `INSTALL.md` and `docs/OPERATOR_MANUAL.md` describe that candidate's controls.
 - The updater uses Python 3.12 and installs binary dependency wheels; its package
   is the same `.fwsc` attached directly to the release.
 - `fmhub.json` has a working image and omits links which are not being provided.
@@ -211,5 +211,5 @@ Save Markdown and JSON as UTF-8. For PowerShell uploads, read with
 `Get-Content -Raw -Encoding UTF8`; for Python use `read_text(encoding="utf-8")`.
 Preview the actual GitHub page after upload. Incorrectly decoding UTF-8 as a
 Windows code page produces strings such as the broken dash previously visible
-in the public playing guide. ASCII punctuation is used in that guide to reduce
+in the public operator's manual. ASCII punctuation is used in that guide to reduce
 this risk, but contributor names should retain their correct spelling.

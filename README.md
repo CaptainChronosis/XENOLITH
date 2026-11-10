@@ -12,7 +12,7 @@ VCA and wavefolder, digital rate/quantization controls and stereo reverb.
 
 - [Download firmware](firmware/XENOLITH1.fwsc)
 - [Windows updater ZIP](downloads/XENOLITH-Windows-updater-85079c89.zip)
-- [Installation](INSTALL.md) / [playing guide](docs/PLAY.md) / [build instructions](BUILD.md)
+- [Installation](INSTALL.md) / [Operator's Manual](docs/OPERATOR_MANUAL.md) / [Build instructions](BUILD.md)
 
 
 The Windows updater requires Python 3.12 with the Windows `py` launcher, uses

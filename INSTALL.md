@@ -1,4 +1,4 @@
-# Install Xenolith
+# XENOLITH / Installation
 
 For Windows, download the updater ZIP from the README and extract it completely.
 Install Python 3.12 with its Windows `py` launcher if it is not already
@@ -29,6 +29,6 @@ This opens no MIDI devices. Dependencies are installed into `.venv-updater`,
 inside the extracted folder; no administrator access or browser extension is
 required by this wrapper.
 
-The wrapper is new and offline-tested. This exact firmware has separate physical
-validation using the established workstation installer; the portable ZIP's own
-physical installation remains to be checked. The newer UC25HQ80 chip is recognized but has not been tested on physical hardware.
+The updater has offline tests, and its local-file installation path was exercised
+on the connected FM-1. Setup on a clean Windows PC without the workstation's
+environment has not been qualified. The newer UC25HQ80 chip is recognized but has not been tested on physical hardware.
