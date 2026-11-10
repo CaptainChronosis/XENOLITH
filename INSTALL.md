@@ -1,8 +1,11 @@
 # Install Xenolith
 
 For Windows, download the updater ZIP from the README and extract it completely.
-Install Python 3.11 or newer with its Windows `py` launcher if it is not already
-available. Run `Setup updater.bat` once, then `Update.bat`.
+Install Python 3.12 with its Windows `py` launcher if it is not already
+available. Run `Setup updater.bat` once, then `Update.bat`. Setup explicitly uses
+3.12 and installs prebuilt packages; it does not require a C++ compiler. If an
+older setup created `.venv-updater` with another Python version, rename that
+folder and run setup again.
 
 1. Connect the FM-1 with a USB data cable and close other MIDI flashers.
 2. Choose **1** for the bundled Xenolith package or **2** to read device identity.
@@ -28,5 +31,4 @@ required by this wrapper.
 
 The wrapper is new and offline-tested. This exact firmware has separate physical
 validation using the established workstation installer; the portable ZIP's own
-physical installation remains to be checked. Newer UC25HQ80 units are not yet
-qualified by this build.
+physical installation remains to be checked. The newer UC25HQ80 chip is recognized but has not been tested on physical hardware.

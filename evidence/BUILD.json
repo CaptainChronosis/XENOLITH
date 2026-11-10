@@ -1,9 +1,9 @@
 {
   "firmware": "firmware/XENOLITH1.fwsc",
-  "sha256": "601c8d1bbf6e2697e742238c2d73bd1b7c362228014ce3267eb8573ba6485202",
+  "sha256": "85079c89d3e7f53abdb1bc5017f9acd7a66de0f41dc0d581bd9a44ab1702641e",
   "bytes": 611496,
-  "build_date": "2026-11-10T02:22:50.595897+00:00",
-  "platform_input_sha256": "9ca37138133c26f4e8243842de5c03bf8a7c33ae95b17726fd71253f07706d7b",
+  "build_date": "2026-11-10T03:27:19.606240+00:00",
+  "platform_input_sha256": "f76d68b42875e5911f86c6d94e67839ac42c4f41410e2ec5fb785bfbce89044c",
   "platform_revisions": [
     {
       "path": ".",
@@ -18,26 +18,134 @@
   "emulator_smoke_seconds": 8,
   "emulator_exit_code": 0,
   "physical": {
-    "scope": "100-second mixer ADC capture of exact candidate; automated measurements, no listening claim",
-    "sample_duration_seconds": 99.973,
-    "peak_dbfs": -19.677,
-    "rail_samples": 0,
-    "late_delta": 0,
-    "repeated_dma_delta": 0,
-    "output_fallback_delta": 0,
-    "core_hold_delta_audible_scenes": 0,
-    "core_hold_delta_stopped_cleanup": 34,
-    "coverage": "eight-cell methods; 64-cell NORMAL, flavours, COMMON and EXP/ALLPASS; final device stopped at eight PARALLEL cells, 44.1k; no patch save"
+    "status": "PASS: final candidate installed, firmware round-trip verified, USB MIDI state/ownership checks and aligned analogue note/clock/release analysis passed.",
+    "package_sha256": "85079c89d3e7f53abdb1bc5017f9acd7a66de0f41dc0d581bd9a44ab1702641e",
+    "transition_method": "Previous 39c9 export Update.bat, selecting the exact 85079 candidate with the local .fwsc option. Wrapper, installer and setup bytes match this export; new ZIP provisioning on a clean PC was not tested.",
+    "transitions": [
+      {
+        "from": "stock V15 / FM-1_015",
+        "to": "XENOLITH / FM-1_29000",
+        "passed": true
+      },
+      {
+        "from": "XENOLITH / FM-1_29000",
+        "to": "JIANT / FM-1_909",
+        "passed": true
+      },
+      {
+        "from": "JIANT / FM-1_909",
+        "to": "XENOLITH / FM-1_29000",
+        "passed": true
+      }
+    ],
+    "midi_checks": {
+      "passed": 9,
+      "total": 9,
+      "scope": "Standard USB note input, channel/panel ownership, velocity-zero release, recorded-note first external start, external Stop, clock-loss release, bare-clock restart prevention."
+    },
+    "audio_dma": {
+      "late_delta": 0,
+      "repeated_half_delta": 0,
+      "maximum_render_us": 3547,
+      "deadline_us": 5804.988662131519
+    },
+    "capture": {
+      "path": "FM-1 analogue line output -> mixing desk -> USB audio capture",
+      "sample_rate": 44100,
+      "seconds": 39.96498866213152,
+      "peak_dbfs": -18.20074273606273,
+      "clipped_samples": 0
+    },
+    "first_attempt": "Stopped at a missing first-encoder acknowledgement before MIDI scenes. Cleanup acknowledged; the bounded retry completed.",
+    "limits": [
+      "Identity acknowledgement does not read back an installed-image hash.",
+      "No physical TRS MIDI source was available; TRS parser/ownership has host coverage only.",
+      "No claim of independent human listening or sample-accurate receive timestamps."
+    ],
+    "wrapper_identity_checks": {
+      "Update.bat": {
+        "same": true,
+        "sha256": "0a02c48722ab63a5bf48eeee40d98d2229eb2af4ec0d363807fb68b016a7a403"
+      },
+      "Setup updater.bat": {
+        "same": true,
+        "sha256": "9dda4561b7c5dbd1cf94fbae73cebe384f334f690e6d637476b7f2882b31c9b8"
+      },
+      "tools/update.py": {
+        "same": true,
+        "sha256": "5b39a887bce955d8b1dadea77e50cf81ce50d0051c4043bfc8efb1ce32e8a0eb"
+      },
+      "tools/fm1_install.py": {
+        "same": true,
+        "sha256": "9e0f7d14b0bf275456de9ea389719faf9ce492b75a0bbcf63bdc1233bbac6ebc"
+      },
+      "tools/updater-requirements.txt": {
+        "same": true,
+        "sha256": "e0f3874415ee0633b75f60c223e051deee893de78de6f4178ac83ad65e1278f1"
+      }
+    },
+    "patch_restore": {
+      "confirmed_by_operator": true,
+      "restored_settings_and_slots": [
+        2,
+        3,
+        12
+      ],
+      "readback_matches_pretest_backup": true,
+      "scope": "Private backup bytes compared locally after physical SELECT confirmation; no backup or patch content distributed."
+    },
+    "analogue_midi_verification": {
+      "status": "PASS",
+      "external_120_bpm": {
+        "note_order": [
+          60,
+          64,
+          67,
+          72,
+          60,
+          64,
+          67,
+          72,
+          60,
+          64,
+          67,
+          72,
+          60,
+          64,
+          67,
+          72
+        ],
+        "burst_count": 16,
+        "rms_dbfs": -26.647116157120358
+      },
+      "continue_90_bpm": {
+        "note_order": [
+          60,
+          64,
+          67,
+          72,
+          60,
+          64,
+          67,
+          72
+        ],
+        "burst_count": 8,
+        "rms_dbfs": -26.42871889463564
+      },
+      "post_stop_rms_dbfs": -99.67226720669358,
+      "post_clock_loss_rms_dbfs": -99.67867643065345,
+      "clipped_samples": 0,
+      "alignment_scope": "Audio windows aligned to independently observed note onsets. Capture process startup does not equal WAV time zero. Timing is sufficient to establish note order, rhythm and release; not sample-accurate absolute latency or a perceived sound-quality judgement."
+    }
   },
   "limitations": [
-    "No claim of physical testing on newer UC25HQ80 flash variant.",
-    "Install identity acknowledgement is not a flash-image hash readback.",
-    "Portable updater wrapper has offline tests; its own physical install is not yet tested."
+    "UC25HQ80 flash recognition is source-checked and offline-tested; no physical device of that revision was available.",
+    "Identity acknowledgement is not a flash-image hash readback."
   ],
   "compiled_application_inputs": [
     {
       "path": "app/app.c",
-      "sha256": "39ec863f7929c89178c5dc5c387dbe30f0dfedf986df1c30a2816bfbb1582c81"
+      "sha256": "3be633748528a2b605c0d016dd4caa98867aa0c3e004a46423e278c229f5c17b"
     },
     {
       "path": "app/app.h",
@@ -49,7 +157,7 @@
     },
     {
       "path": "app/fm1.toml",
-      "sha256": "669dda5faed073f4c1e847644317c7cec08f40c2533f01e0ddc778d48ee56a8e"
+      "sha256": "071d8c52fc449e130f6b7657673465e3d3c813dfa17dee9dce13f89e91c65ecb"
     },
     {
       "path": "app/tests/test_core_performance.c",
@@ -65,7 +173,7 @@
     },
     {
       "path": "app/words.tsv",
-      "sha256": "a7f5f408b408454ca2327eb1cae5a75a7dad81ab187fb6fba6299bb538038fd0"
+      "sha256": "6dee390c3967617b3e1f425d8e2953a9223a0d0801b6338515ffc650ce9ceac1"
     },
     {
       "path": "app/xenolith_admission.h",
@@ -236,6 +344,14 @@
       "sha256": "f489c9bfbf6e8dc0a080ac923c322b6beca56c52fe8ff7aad386bc2d8c6afe16"
     },
     {
+      "path": "app/xenolith_midi.c",
+      "sha256": "d1b9c83e158d7a14b109c7d750dbc26178dd57637a9fd6629ada19732925c4ee"
+    },
+    {
+      "path": "app/xenolith_midi.h",
+      "sha256": "3cbd213ad3d696a901228ff265a4680d1178efc5420007057977df5aa95eefdd"
+    },
+    {
       "path": "app/xenolith_mod_motion.inc",
       "sha256": "8392437f889512405cb05cfebe853f88630f5a8bfcac6153e4f15d891f2eb436"
     },
@@ -297,15 +413,15 @@
     },
     {
       "path": "app/xenolith_seq_ui.inc",
-      "sha256": "da652d85990bb02637544edf01880c94d95c9ff951fbf7dc559ffbdd041d42ae"
+      "sha256": "2ba91ab2cdba25ff88d70cc8f3586cf47f68a6c05b589a66b17b2602cfceb041"
     },
     {
       "path": "app/xenolith_sequence.c",
-      "sha256": "186692415aafb355c805a4a5864aff9991c5beddd6bac0171d1ddd0e683c2839"
+      "sha256": "2d0ed7ef3c2bf3dfc0be20b378d44bc2133af8b2d2e18dbe2bb29ca8886c3ce2"
     },
     {
       "path": "app/xenolith_sequence.h",
-      "sha256": "092f33d56553d8756b736660562898c1a59f887cf83730da9a733f708e7436a6"
+      "sha256": "22d9f5cb57399a6ac70409b24ac9ec65ee6ab8e9c3f38f0055773f8410ff1893"
     },
     {
       "path": "app/xenolith_sine_table.h",
@@ -317,7 +433,7 @@
     },
     {
       "path": "app/xenolith_topology_ui.inc",
-      "sha256": "9bb5d7784f07bffa8b3e29b45c092ace31ea005363a4ce8512020a6ee73c07f8"
+      "sha256": "04da2e058ade5caf9e253d5cf148fcfe75cf100850ad6db378c9698e55e93c5a"
     },
     {
       "path": "app/xenolith_view.inc",
@@ -326,15 +442,27 @@
   ],
   "portable_source_rebuild": {
     "matched": true,
-    "sha256": "601c8d1bbf6e2697e742238c2d73bd1b7c362228014ce3267eb8573ba6485202",
+    "sha256": "85079c89d3e7f53abdb1bc5017f9acd7a66de0f41dc0d581bd9a44ab1702641e",
     "compiler": "JieLi Windows 2.5.3",
-    "scope": "Isolated exported source tree rebuilt; exact firmware bytes match."
+    "python": "3.12",
+    "scope": "Fresh isolated directory populated only from the previous explicit public allowlist and current compiled inputs. Exact firmware bytes match."
   },
   "portable_installer_offline_tests": {
     "wrapper_tests": 8,
     "wrapper_passed": 8,
-    "pinned_protocol_test_exit_code": 0,
+    "package_check_passed": true,
     "device_io": false,
-    "protocol_cross_language_fixture": "skipped; requires prepared template package"
-  }
+    "physical_wrapper_local_file_path_verified": true
+  },
+  "host_midi_controls": {
+    "ownership_assertions": 8882067,
+    "sequence_clock_scenarios": 23,
+    "sequence_clock_assertions": 27446,
+    "recorder_scenarios": 65,
+    "recorder_assertions": 23208070,
+    "actual_app_pump_scenarios": 12,
+    "actual_app_pump_checks": 23,
+    "scope": "All tests repeated against exported sources; host-only, no device timing claim."
+  },
+  "change_scope": "Adds standard MIDI input and explicit 24-PPQN transport over the preceding source. Retains the HOME cell diagram refinement. No synthesis, filter, VCA or reverb algorithms changed in this candidate."
 }

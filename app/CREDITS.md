@@ -10,7 +10,7 @@
   constructor behavior in `xenolith_core.c` are adapted from SuperCollider 3.14.1
   `server/plugins/NoiseUGens.cpp`, Copyright (c) 2002 James McCartney,
   GPL-2.0-or-later. The exact source URL and notice are retained in that file.
-  The combined probe uses the later-version option under GPL-3.0-or-later;
+  The combined instrument uses the later-version option under GPL-3.0-or-later;
   `LICENSE` and `COPYING_SUPERCOLLIDER` contain the selected GPL version 3 text.
 - **The operator's Zusammenbruch XX29 DSP_v1.46**: the original eight-cell
   Xenolith FM equations, control meanings and X_BUS inspiration. The original

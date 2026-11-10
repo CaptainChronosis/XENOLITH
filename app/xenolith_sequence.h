@@ -94,6 +94,10 @@ typedef struct {
     float lane_value[XENOLITH_SEQUENCE_LANES], lane_target[XENOLITH_SEQUENCE_LANES];
     float lane_error[XENOLITH_SEQUENCE_LANES]; /* compensated addition for long slow ramps */
     float rise_step[XENOLITH_SEQUENCE_LANES], fall_step[XENOLITH_SEQUENCE_LANES];
+    /* Runtime-only external transport; never part of the saved pattern. */
+    uint32_t external_clock, external_wait, external_tick, external_steps;
+    uint32_t external_elapsed, external_period, external_increment;
+    uint32_t external_last_ms, external_have_ms;
 } XenolithSequence;
 
 _Static_assert(sizeof(float)==4, "Sequence schema requires32-bit floats");
@@ -148,6 +152,13 @@ int xenolith_sequence_apply_pattern(XenolithSequence *state,const XenolithSequen
 int xenolith_sequence_play_toggle(XenolithSequence *state); /* enabled only; starts at0; exits STEP record; toggles stop */
 void xenolith_sequence_stop(XenolithSequence *state);
 void xenolith_sequence_panic(XenolithSequence *state); /* stops REC/transport, preserves image/take */
+/* Audio-owner MIDI realtime input. FA/FB explicitly acquire24PPQN clock;
+ * bareF8 never starts transport. FC and clock loss release only the sequence's
+ * owned gate. Local PLAY returns to internal BPM. arrival_ms is the monotonic
+ * foreground receive timestamp (uint32 wrap allowed), not a sample timestamp.
+ * START waits for firstF8 at zero; CONTINUE resumes the retained clock position.
+ * No Song Position Pointer or clock output is implemented. Returns1 if handled. */
+int xenolith_sequence_midi_realtime(XenolithSequence *state,uint32_t status,uint32_t arrival_ms);
 /* STEP: stopped fresh key-down writes edit cursor and advances it; parameter
  * capture writes selected cursor without advancing. REPLACE/OVERDUB: a stopped
  * transport starts a one-loop take on the first fresh

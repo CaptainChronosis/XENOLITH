@@ -4,6 +4,7 @@
  * Leo Kuroshita (@kurogedelic), Hugelton Instruments. */
 /* The platform's boot and main loop (from X0X's, by way of FoMni-1): boot (WDT first, boot-loop guard, guards), LCD, input (TIMER5
  * 10 kHz), audio (ALNK0), USB; then the main loop: UI at ~60 frames/s, input polled in between. */
+#include "fm1_flash_id.h"
 extern uint32_t _data_start[], _data_end[], _data_load[], _bss_start[], _bss_end[];
 extern uint32_t _pool_start[], _pool_end[], _rt_start[], _rt_end[], _rt_load[];
 
@@ -947,7 +948,7 @@ static void fm1_main(void)
                                                      * VDDIO 3.2 V, WiFi's regulator automatic (fm1_sys.h) */
         fm1_clock_read(clock_boot);
         clock_fix = (int8_t)fm1_clock_stock();      /* the stock 360 MHz, whichever bootloader started us (fm1_clock.h) */
-        flash_ok = FL_FAR(fl_jedec_ram)() == 0x856014u;   /* the expected 1 MiB part, else RAM only */
+        flash_ok = fm1_flash_known(FL_FAR(fl_jedec_ram)()); /* known 1 MiB parts, else RAM only */
 #if FM1B_WIFI || FM1B_BLE
         if (flash_ok)
             FL_FAR(fl_uid_ram)(flash_uid);

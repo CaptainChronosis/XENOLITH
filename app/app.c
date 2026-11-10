@@ -18,6 +18,8 @@
 #include "xenolith_rate_response.h"
 #include "xenolith_performance.h"
 #include "xenolith_paraphony.h"
+#include "xenolith_midi.h"
+#include "xenolith_midi.c" /* Bounded foreground parser, compiled with the app at -Os. */
 #include "xenolith_patches.h"
 #include "xenolith_modulation.h"
 #include "xenolith_sequence.h"
@@ -131,6 +133,15 @@ static volatile uint32_t folder_active_snapshot;
 static float amplitude_level=1.0f,mod_amplitude;
 static uint8_t held_order[27];
 static uint32_t held_count,drone_latch,panic_latched;
+static XenolithMidiState midi_notes;
+static volatile uint32_t midi_held_count;
+static uint32_t midi_virtual_keys,midi_usb_link,midi_seen_revision;
+static uint8_t midi_recorded[128];
+typedef struct { uint32_t status,arrival_ms,generation; } MidiRealtime;
+static MidiRealtime midi_realtime[64];
+static volatile uint32_t midi_rt_write,midi_rt_read,midi_rt_dropped,midi_rt_reset;
+static uint32_t midi_rt_applied,midi_clock_port=XMIDI_EMPTY;
+static volatile uint32_t midi_rt_generation;
 static int32_t keyboard_octave;
 static XenolithExhaust exhaust PLAT_POOL;
 static XenolithExhaustConfig exhaust_config[2];
@@ -200,6 +211,7 @@ static volatile uint32_t seq_panic_serial;
 static uint32_t seq_panic_applied,seq_manual_held,seq_wet_active;
 static uint32_t seq_record_mode=XSEQ_RECORD_REPLACE,seq_record_notes=1u,seq_record_lanes=0u;
 static volatile uint32_t seq_running,seq_recording,seq_playhead;
+static volatile uint32_t seq_external_clock;
 static volatile uint32_t seq_beat_phase;
 static uint32_t seq_beat_increment;
 /* Event telemetry for native/physical diagnostics; never used by synthesis. */
@@ -231,6 +243,8 @@ typedef struct {
     uint32_t active,mask_lo,mask_hi,cells;
     uint32_t paraphony,voices,performance_serial;
     float reference_pitch;
+    float midi_pitch;
+    uint32_t midi_active;
 } AppKeyboard;
 static AppKeyboard keyboard_config[2],keyboard_audio;
 static volatile uint32_t keyboard_serial;
@@ -267,6 +281,19 @@ static void seq_keyboard_record_text(char *out);
 static void keyboard_ui_config_loaded(void);
 static uint32_t keyboard_target_active(uint32_t destination,uint32_t active);
 static void keyboard_update(uint32_t keys,uint32_t pressed);
+static void midi_input(void);
+static float midi_note_pitch(uint32_t note)
+{
+    return fm_clampf(440.0f*fm_exp2f(((float)note-69.0f)/12.0f),20.0f,800.0f);
+}
+static float midi_identity_pitch(uint32_t identity)
+{
+    return identity<27u?xenolith_key_pitch(identity,keyboard_octave):midi_note_pitch(identity-27u);
+}
+static uint32_t live_note_gate(void)
+{
+    return midi_held_count||(held_count&&keyboard_edit.gate);
+}
 static uint32_t graph_growth_for(uint32_t count)
 {
     uint32_t i,kind,uniform;
@@ -444,8 +471,9 @@ static void seq_record_recalled(void)
 }
 static void keyboard_values(void)
 {
+    if(keyboard_audio.midi_active)seq_pitch=keyboard_audio.midi_pitch;
     if(!keyboard_target_active(keyboard_audio.config.destination,keyboard_audio.active))return;
-    if(keyboard_audio.config.destination==XKEY_TONIC)seq_pitch=keyboard_audio.value;
+    if(keyboard_audio.config.destination==XKEY_TONIC&&!keyboard_audio.midi_active)seq_pitch=keyboard_audio.value;
     else if(keyboard_audio.config.destination==XKEY_INDEX)seq_index=keyboard_audio.value;
     else if(keyboard_audio.config.destination==XKEY_EXP_DEPTH&&core.topology.mode==XTOPO_EXPONENTIAL)seq_index=keyboard_audio.value;
     else if(keyboard_audio.config.destination==XKEY_RATIO)seq_ratio=keyboard_audio.value;
@@ -469,15 +497,31 @@ static void keyboard_update(uint32_t keys,uint32_t pressed)
     next=keyboard_serial+1u;c=&keyboard_config[next&1u];
     c->config=assigned;c->active=0u;c->mask_lo=0u;c->mask_hi=0u;c->value=0.0f;c->cells=motion_effective_cells();
     c->paraphony=0u;c->voices=0u;c->reference_pitch=84.0f;c->performance_serial=performance_serial;
+    c->midi_active=0u;c->midi_pitch=84.0f;
+    if(midi_held_count){
+        uint32_t identity=xenolith_midi_latest(&midi_notes);
+        if(identity>=27u&&identity<XMIDI_IDENTITIES){c->midi_active=1u;c->midi_pitch=midi_identity_pitch(identity);}
+        else if(assigned.destination!=XKEY_TONIC){
+            uint32_t j=midi_notes.count;
+            while(j)if(midi_notes.order[--j]>=27u){c->midi_active=1u;c->midi_pitch=midi_identity_pitch(midi_notes.order[j]);break;}
+        }
+    }
     for(i=0;i<64u;i++)c->frequency[i]=84.0f;
     last=held_count?held_order[held_count-1u]:keyboard_last_key;
     if(keys)keyboard_last_key=last;
     if(performance_edit.voices>1u&&paraphony_supported()&&assigned.destination==XKEY_TONIC&&!drone_latch&&!panic_latched){
-        if(held_count){
+        if(held_count||midi_held_count){
             float pitches[27];XenolithParaphonyOutput result;
-            for(i=0;i<27u;i++)pitches[i]=xenolith_key_pitch(i,keyboard_octave);
-            c->reference_pitch=pitches[last];
-            if(xenolith_paraphony_allocate(&paraphony_allocator,held_order,pitches,held_count,c->cells,
+            uint8_t tokens[8],identities[8];const uint8_t *order=held_order;uint32_t count=held_count;
+            if(midi_virtual_keys){
+                count=xenolith_midi_voicing(&midi_notes,tokens,identities);order=tokens;
+                for(i=0;i<8u;i++)pitches[i]=identities[i]<XMIDI_IDENTITIES?midi_identity_pitch(identities[i]):84.0f;
+                c->reference_pitch=midi_identity_pitch(xenolith_midi_latest(&midi_notes));
+            }else{
+                for(i=0;i<27u;i++)pitches[i]=xenolith_key_pitch(i,keyboard_octave);
+                c->reference_pitch=pitches[last];
+            }
+            if(xenolith_paraphony_allocate(&paraphony_allocator,order,pitches,count,c->cells,
                 performance_edit.voices,c->reference_pitch,c->reference_pitch,performance_edit.spread,&result)){
                 c->paraphony=1u;c->voices=result.active_voices;c->mask_lo=result.mask_lo;c->mask_hi=result.mask_hi;
                 for(i=0;i<64u;i++)c->frequency[i]=result.frequency[i];
@@ -666,6 +710,23 @@ static void seq_audio_commands(void)
     if(limit)seq_publish_snapshot();
     X_PUBLISH_BARRIER();seq_read=read;
 }
+static void midi_audio_realtime(void)
+{
+    uint32_t read=midi_rt_read,end=midi_rt_write,limit=0u;
+    X_PUBLISH_BARRIER();
+    if(midi_rt_applied!=midi_rt_reset){
+        midi_rt_applied=midi_rt_reset;
+        xenolith_sequence_midi_realtime(&sequencer,0xfcu,0u);
+        midi_rt_read=end;return;
+    }
+    while(read!=end&&limit++<32u){
+        const MidiRealtime *event=&midi_realtime[read&63u];
+        if(event->generation==midi_rt_generation)
+            xenolith_sequence_midi_realtime(&sequencer,event->status,event->arrival_ms);
+        read++;
+    }
+    X_PUBLISH_BARRIER();midi_rt_read=read;
+}
 static void seq_capture_control(uint32_t destination,float value)
 {
     uint32_t i;
@@ -702,7 +763,7 @@ static void seq_audio_tick(XenolithModInput *input)
 {
     const XenolithSequenceFrame *f=xenolith_sequence_sample(&sequencer);
     uint32_t i;
-    uint32_t manual=held_count&&keyboard_audio.config.gate;
+    uint32_t manual=live_note_gate();
     uint32_t drone=f->running&&sequencer.image.config.note_mode==XSEQ_CONTINUOUS;
     if(f->running){if(!seq_audio_active)seq_beat_phase=0u;seq_beat_phase+=seq_beat_increment;}
     if(!f->running||!seq_audio_active)seq_note_valid=0u;
@@ -734,7 +795,7 @@ static void seq_audio_tick(XenolithModInput *input)
                 seq_owned_destinations|=(1u<<XSEQ_DEST_INDEX)|(1u<<XSEQ_DEST_EXP_DEPTH);
         }
         seq_ans_keys=0u;seq_ans_active=0u;seq_bits_active=0u;
-        seq_pitch=f->running&&seq_note_valid&&!(manual&&keyboard_audio.config.destination==XKEY_TONIC)?seq_note_hz:pitch_hz;
+        seq_pitch=f->running&&seq_note_valid&&!(manual&&(keyboard_audio.config.destination==XKEY_TONIC||midi_held_count))?seq_note_hz:pitch_hz;
         seq_index=fm_index;seq_ratio=fm_ratio;seq_drift=drift_amount;seq_wet=exhaust_blend_target;seq_amplitude=1.0f;seq_filter_cutoff=filter.target.config.cutoff_hz;seq_filter_resonance=filter.target.config.resonance;
         input->sequence_mask=f->running?f->lane_mask:0u;
         for(i=0;i<4u;i++)input->sequence[i]=f->lane[i];
@@ -1040,7 +1101,7 @@ static void patch_service(uint32_t now)
  * the live edit buffer when an archive is requested. Platform owns the wire. */
 int app_backup_playing(void)
 {
-    return running||seq_running||seq_recording||patch_operation||held_count||envelope.level>0.0001f;
+    return running||seq_running||seq_recording||patch_operation||held_count||midi_held_count||envelope.level>0.0001f;
 }
 void app_backup_flush(void) {}
 void app_backup_hold(int on) { backup_holding=on?1u:0u; }
@@ -1086,6 +1147,7 @@ static void defaults(void)
 
 void app_init(void)
 {
+    xenolith_midi_init(&midi_notes);midi_usb_link=plat_midi_out_link();
     defaults();
     xenolith_governor_init(&governor);
     xenolith_init(&core,44100.0f,0x58584E31u);
@@ -1107,6 +1169,9 @@ void app_init(void)
 
 void app_panic(void)
 {
+    xenolith_midi_clear(&midi_notes);midi_held_count=0u;keyboard_dirty=1u;
+    {uint32_t i;for(i=0;i<128u;i++)midi_recorded[i]=0u;}
+    midi_clock_port=XMIDI_EMPTY;midi_rt_reset++;
     if(seq_direct_take)seq_record_lanes=seq_direct_key_lanes;
     seq_direct_take=0u;
     running=0u;
@@ -1216,6 +1281,8 @@ void app_render(int32_t *lr,uint32_t n,uint32_t master_q12)
     }
     paraphony_effective_voices=digital.performance.voices<core.cells?digital.performance.voices:core.cells;
     if(budget_ready||seq_panic_serial!=seq_panic_applied)seq_audio_commands();
+    midi_audio_realtime();
+    seq_external_clock=sequencer.external_clock;
     seq_record_before=sequencer.record_state;
     {uint32_t steps=xenolith_sequence_steps_per_beat(sequencer.image.config.division);
         seq_beat_increment=sequencer.phase_increment/(steps?steps:4u);}
@@ -1421,7 +1488,7 @@ void app_render(int32_t *lr,uint32_t n,uint32_t master_q12)
             seq_audio_tick(&mod_input);wet_target=seq_wet;
         }
         if(bank_needed){
-            uint32_t gates=(held_count||drone_latch?XENV_KEY_BIT:0u)
+            uint32_t gates=(held_count||midi_held_count||drone_latch?XENV_KEY_BIT:0u)
                 |(envbank_sequence_gate?XENV_SEQUENCE_BIT:0u);
             xenolith_envelope_bank_sample(&envbank,envbank_edges,gates);envbank_edges=0u;
         }
@@ -1652,6 +1719,76 @@ static void seq_key_command(SeqCommand *command,uint32_t key,uint32_t note)
         else if(!xenolith_keyboard_map_value(&config,key,&value))continue;
         if(xenolith_sequence_value_to_normalized(d,value,&command->data.values[i]))command->index|=1u<<i;
     }
+}
+static uint32_t physical_recorded_note(uint32_t note)
+{
+    uint32_t i;for(i=0;i<27u;i++)if((seq_key_valid&(1u<<i))&&seq_key_note[i]==note)return 1u;
+    return 0u;
+}
+static void midi_record_releases(void)
+{
+    uint32_t note;
+    for(note=0;note<128u;note++)if(midi_recorded[note]&&!xenolith_midi_held(&midi_notes,note)){
+        midi_recorded[note]=0u;
+        if(!physical_recorded_note(note)&&!seq_simple(SQ_KEY,note,0u))seq_panic_serial++;
+    }
+}
+static void midi_queue_realtime(uint32_t status,uint32_t port)
+{
+    uint32_t write;
+    if(status==0xfau||status==0xfbu){
+        if(!seq_edit.config.enabled)return;
+        midi_clock_port=port;
+    }else if(port!=midi_clock_port)return;
+    write=midi_rt_write;
+    if(write-midi_rt_read>=64u){midi_rt_dropped++;midi_rt_reset++;midi_clock_port=XMIDI_EMPTY;return;}
+    midi_realtime[write&63u]=(MidiRealtime){status,plat_ms(),midi_rt_generation};
+    X_PUBLISH_BARRIER();midi_rt_write=write+1u;
+}
+/* The platform assembles USB-MIDI packets for USB and TRS. Process a bounded
+ * foreground batch; note ownership and allocations never run in an IRQ. */
+static void midi_input(void)
+{
+    uint32_t packet,limit=0u,before=midi_seen_revision,old=midi_held_count,pressed=0u;
+    uint32_t link=plat_midi_out_link();int port;
+    if(link!=midi_usb_link){
+        midi_usb_link=link;xenolith_midi_clear_port(&midi_notes,XMIDI_USB);
+        if(midi_clock_port==XMIDI_USB){midi_clock_port=XMIDI_EMPTY;midi_rt_reset++;}
+    }
+    while(limit++<32u&&plat_midi_in(&packet,&port)){
+        XenolithMidiEvent event;uint32_t input_port;
+        if(port!=PORT_USB&&port!=PORT_TRS)continue;
+        input_port=port==PORT_USB?XMIDI_USB:XMIDI_TRS;
+        event=xenolith_midi_packet(&midi_notes,packet,input_port);
+        if(event.type==XMIDI_REALTIME){midi_queue_realtime(event.status,input_port);continue;}
+        if(event.type==XMIDI_NOTE_ON){
+            pressed=1u;
+            if(!midi_virtual_keys){midi_virtual_keys=1u;xenolith_paraphony_reset(&paraphony_allocator);}
+            /* Real MIDI pitch reaches the tonic capture path directly. CV
+             * keyboard mappings remain the explicitly assigned panel keys. */
+            if(seq_edit.config.enabled){
+                SeqCommand command={0};command.type=SQ_KEY;command.a=event.note;command.b=1u;
+                if(seq_send(&command))midi_recorded[event.note]=1u;else seq_ui_status=SEQ_UI_FULL;
+            }
+            midi_held_count=midi_notes.midi_count;
+            pitch_hz=midi_note_pitch(event.note);
+            mod_key=fm_clampf(((float)event.note-66.0f)/24.0f,-1.0f,1.0f);
+            drone_latch=0u;panic_latched=0u;running=1u;envelope_event(1u);
+        }
+    }
+    midi_held_count=midi_notes.midi_count;
+    midi_record_releases();
+    if(before!=midi_notes.revision){
+        uint32_t identity=xenolith_midi_latest(&midi_notes);
+        if(midi_held_count||old||pressed){
+            if(identity>=27u&&identity<XMIDI_IDENTITIES)pitch_hz=midi_identity_pitch(identity);
+            else if(identity<27u&&keyboard_edit.destination==XKEY_TONIC&&keyboard_edit.response==XKEY_CHROMATIC)
+                pitch_hz=midi_identity_pitch(identity);
+        }
+        keyboard_dirty=1u;redraw=1u;
+    }
+    midi_seen_revision=midi_notes.revision;
+    if((old||pressed)&&!midi_held_count&&!live_note_gate()&&!drone_latch&&!seq_running){running=0u;envelope_event(0u);}
 }
 #include "xenolith_topology_ui.inc"
 
@@ -1905,16 +2042,18 @@ static void input(void)
     for(k=0;k<held_count;k++)if(keys&(1u<<held_order[k]))held_order[write++]=held_order[k];
     held_count=write;
     for(k=0;k<NKEYS;k++)if(new_keys&(1u<<k))held_order[held_count++]=(uint8_t)k;
+    xenolith_midi_physical(&midi_notes,keys);
     if((pressed&(1u<<B_PLAY))&&!((pressed&(1u<<B_REC))&&!seq_edit.config.enabled)){
+        midi_clock_port=XMIDI_EMPTY;midi_rt_generation++;
         if(seq_direct_take){seq_record_lanes=seq_direct_key_lanes;seq_direct_take=0u;}
         if(patch_page)patch_begin(1u);
         else if(seq_edit.config.enabled){
-            seq_simple(SQ_PLAY,0u,0u);drone_latch=0u;panic_latched=0u;running=!seq_running||(held_count&&keyboard_edit.gate);
+            seq_simple(SQ_PLAY,0u,0u);drone_latch=0u;panic_latched=0u;running=!seq_running||live_note_gate();
         }
         else{
             drone_latch=!drone_latch;panic_latched=0u;
             if(drone_latch){running=1u;envelope_event(1u);}
-            else if(held_count==0u||!keyboard_edit.gate){running=0u;envelope_event(0u);}
+            else if(!live_note_gate()){running=0u;envelope_event(0u);}
         }
         redraw=1u;
     }
@@ -2058,7 +2197,10 @@ static void input(void)
             uint32_t midi=(uint32_t)clamp(53+(int32_t)k+12*keyboard_octave,0,127);
             if(new_keys&(1u<<k)){SeqCommand c;seq_key_command(&c,k,midi);seq_key_note[k]=(uint8_t)midi;seq_key_valid|=1u<<k;if(!seq_send(&c))seq_ui_status=SEQ_UI_FULL;}
         }
-        if((previous_keys&~keys)&seq_key_valid&(1u<<k)){seq_simple(SQ_KEY,seq_key_note[k],0u);seq_key_valid&=~(1u<<k);}
+        if((previous_keys&~keys)&seq_key_valid&(1u<<k)){
+            uint32_t note=seq_key_note[k];seq_key_valid&=~(1u<<k);
+            if(!physical_recorded_note(note)&&!(midi_recorded[note]&&xenolith_midi_held(&midi_notes,note)))seq_simple(SQ_KEY,note,0u);
+        }
     }
     if(new_keys&&!(pressed&(1u<<B_REC))){
         k=held_order[held_count-1u];
@@ -2072,9 +2214,10 @@ static void input(void)
         if(live_key.destination==XKEY_TONIC&&live_key.response==XKEY_CHROMATIC)pitch_hz=xenolith_key_pitch(k,keyboard_octave);
         redraw=1u;
     }
-    if(old_count&&held_count==0u&&keyboard_edit.gate&&!drone_latch&&!panic_latched&&!seq_running){
+    if(old_count&&held_count==0u&&keyboard_edit.gate&&!midi_held_count&&!drone_latch&&!panic_latched&&!seq_running){
         running=0u;envelope_event(0u);redraw=1u;
     }
+    midi_input();
     if(panic_chord)app_panic();
     else if((pressed&(1u<<B_REC))&&!governor_chord&&!governor_page){
         if(seq_edit.config.enabled){
@@ -2246,7 +2389,7 @@ static void input(void)
             output_page=0u;exhaust_page=0u;envelope_page=0u;redraw=1u;
         }
     }
-    if(keyboard_dirty&&keyboard_audio.config.gate&&!keyboard_edit.gate&&held_count&&!drone_latch&&!seq_running){running=0u;envelope_event(0u);}
+    if(keyboard_dirty&&keyboard_audio.config.gate&&!keyboard_edit.gate&&held_count&&!midi_held_count&&!drone_latch&&!seq_running){running=0u;envelope_event(0u);}
     keyboard_update(keys,new_keys);
     if(wet_changed)exhaust_publish();
     if(env_changed)envelope_publish();

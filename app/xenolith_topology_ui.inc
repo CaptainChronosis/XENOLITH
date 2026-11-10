@@ -163,16 +163,31 @@ static void topology_ui_home_glyph(void)
     XenolithGraph graph;uint32_t count=active_cells>64u?64u:active_cells;
     xenolith_graph_compile(&graph_edit,topology_edit.growth,count,&graph);
     cv_rect(126,18,54,18,C_BLACK);
+    cv_line(132,18,136,18,C_LINE);cv_line(132,18,132,21,C_LINE);
+    cv_line(168,18,172,18,C_LINE);cv_line(172,18,172,21,C_LINE);
+    cv_line(132,35,136,35,C_LINE);cv_line(132,32,132,35,C_LINE);
+    cv_line(168,35,172,35,C_LINE);cv_line(172,32,172,35,C_LINE);
     topology_ui_graph(&graph,count,1);
 }
 static void topology_ui_home_count(void)
 {
-    char value[24];
+    static const uint8_t digits[10][7]={
+        {14,17,19,21,25,17,14},{4,12,4,4,4,4,14},
+        {14,17,1,2,4,8,31},{30,1,1,14,1,1,30},
+        {2,6,10,18,31,2,2},{31,16,16,30,1,1,30},
+        {14,16,16,30,17,17,14},{31,1,2,4,8,8,8},
+        {14,17,17,14,17,17,14},{14,17,17,15,1,1,14}
+    };
+    uint32_t count=active_cells>64u?64u:active_cells;
+    uint32_t places=count>=10u?2u:1u,i,x,y;
+    int left=186-(int)(places*6u-1u)/2;
+    cv_rect(121,18,5,18,C_BLACK);
     cv_rect(180,18,52,18,C_BLACK);
-    cv_line(188,19,226,19,C_LINE);cv_line(188,35,226,35,C_LINE);
-    cv_line(188,19,188,35,C_LINE);cv_line(226,19,226,35,C_LINE);
-    number_text((int32_t)active_cells,value);
-    cv_text(207-text_w(&FONT_XS,value)/2,20,&FONT_XS,value,C_HI);
+    for(i=0;i<places;i++){
+        uint32_t digit=places==2u&&!i?count/10u:count%10u;
+        for(y=0;y<7u;y++)for(x=0;x<5u;x++)
+            if(digits[digit][y]&(16u>>x))cv_rect(left+(int)(i*6u+x),23+(int)y,1,1,RGB(112,96,208));
+    }
 }
 static void topology_ui_draw(void)
 {

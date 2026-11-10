@@ -210,9 +210,58 @@ void xenolith_sequence_stop(XenolithSequence *s) {
     s->pending_off|=s->gate;s->gate=0u;s->running=0u;s->pending_start=0u;
     s->record_mode=XSEQ_RECORD_OFF;s->record_state=XSEQ_REC_IDLE;
     s->record_notes=0u;s->record_lanes=0u;s->capture_valid=0u;s->capture_future=0u;
+    s->external_steps=0u;s->external_wait=0u;
     zero_bytes(s->keys_down,sizeof s->keys_down);
 }
 void xenolith_sequence_panic(XenolithSequence *s) { xenolith_sequence_stop(s); }
+static void external_prepare(XenolithSequence *s) {
+    uint32_t ticks=24u/xenolith_sequence_steps_per_beat(s->image.config.division);
+    if(!s->external_period)s->external_period=(uint32_t)(110250.0f/s->image.config.bpm+.5f);
+    s->external_increment=(uint32_t)(4294967296.0f/((float)s->external_period*(float)ticks));
+}
+int xenolith_sequence_midi_realtime(XenolithSequence *s,uint32_t status,uint32_t arrival_ms) {
+    uint32_t ticks,delta;
+    if(!s || !s->image.config.enabled)return 0;
+    if(status==0xfau || status==0xfbu){
+        if(status==0xfbu && s->external_clock && s->running)return 1;
+        if(s->record_mode==XSEQ_RECORD_STEP)xenolith_sequence_record_arm(s,XSEQ_RECORD_OFF,0u,0u);
+        s->pending_off|=s->gate;s->gate=0u;s->pending_start=0u;
+        if(status==0xfau){s->playhead=0u;s->phase=0u;s->external_tick=0u;s->lane_valid_mask=0u;}
+        else if(!s->external_clock){
+            ticks=24u/xenolith_sequence_steps_per_beat(s->image.config.division);
+            s->external_tick=(s->playhead% xenolith_sequence_steps_per_beat(s->image.config.division))*ticks
+                +(uint32_t)(((uint64_t)s->phase*ticks)>>32);
+            if(s->external_tick>23u)s->external_tick=23u;
+        }
+        s->external_clock=1u;s->external_wait=1u;s->external_steps=0u;
+        s->external_elapsed=0u;s->external_have_ms=0u;s->external_last_ms=arrival_ms;
+        s->external_period=0u;external_prepare(s);s->running=1u;return 1;
+    }
+    if(status==0xfcu){
+        if(!s->external_clock)return 0;
+        xenolith_sequence_stop(s);return 1;
+    }
+    if(status!=0xf8u || !s->external_clock || !s->running)return 0;
+    if(s->external_have_ms){
+        delta=arrival_ms-s->external_last_ms;
+        /* Reject packet bursts/discontinuities as tempo estimates; clock edges
+         * still determine position.5..500ms admits5..500 quarter-note BPM. */
+        if(delta>=5u && delta<=500u){
+            uint32_t period=(delta*441u+5u)/10u;
+            s->external_period=(s->external_period*3u+period+2u)/4u;
+        }
+    }
+    s->external_last_ms=arrival_ms;s->external_have_ms=1u;s->external_elapsed=0u;
+    external_prepare(s);
+    ticks=24u/xenolith_sequence_steps_per_beat(s->image.config.division);
+    if(s->external_wait){s->external_wait=0u;s->pending_start=1u;}
+    else{
+        s->external_tick=(s->external_tick+1u)%24u;
+        if(s->external_tick%ticks==0u && s->external_steps<64u)++s->external_steps;
+    }
+    s->phase=(s->external_tick%ticks)*(UINT32_MAX/ticks);
+    return 1;
+}
 int xenolith_sequence_configure(XenolithSequence *s,const XenolithSequenceConfig *c) {
     if(!s || !xenolith_sequence_config_valid(c))return 0;
     if(!c->enabled)xenolith_sequence_stop(s);
@@ -221,6 +270,7 @@ int xenolith_sequence_configure(XenolithSequence *s,const XenolithSequenceConfig
         s->record_notes=0u;s->record_lanes=0u;s->capture_valid=0u;s->capture_future=0u;
     }
     s->image.config=*c;s->phase_increment=prepare_phase(c);
+    if(s->external_clock)external_prepare(s);
     if(s->edit_step>=c->length)s->edit_step=c->length-1u;
     if(s->running && s->playhead>=c->length){
         s->pending_off|=s->gate;s->gate=0u;s->playhead=0u;s->phase=0u;s->pending_start=1u;
@@ -270,6 +320,7 @@ int xenolith_sequence_apply_pattern(XenolithSequence *s,const XenolithSequencePa
 }
 int xenolith_sequence_play_toggle(XenolithSequence *s) {
     if(!s || !s->image.config.enabled)return 0;
+    s->external_clock=0u;s->external_steps=0u;s->external_wait=0u;
     if(s->running){xenolith_sequence_stop(s);return 1;}
     if(s->record_mode==XSEQ_RECORD_STEP){
         /* PLAY leaves stopped step entry and auditions the preserved take. */
@@ -295,6 +346,7 @@ int xenolith_sequence_record_arm(XenolithSequence *s,uint32_t mode,uint32_t note
 static void begin_recording(XenolithSequence *s);
 static void start_key_take(XenolithSequence *s) {
     if(s->record_state!=XSEQ_REC_ARMED || s->record_mode<XSEQ_RECORD_REPLACE || s->running)return;
+    s->external_clock=0u;s->external_steps=0u;s->external_wait=0u;
     s->running=1u;s->phase=0u;s->playhead=0u;s->pending_start=1u;s->lane_valid_mask=0u;
     begin_recording(s);
 }
@@ -498,12 +550,27 @@ static void enter_step(XenolithSequence *s,uint32_t cycle_start,uint32_t initial
 const XenolithSequenceFrame *xenolith_sequence_sample(XenolithSequence *s) {
     uint32_t i;
     if(!s)return 0;
+    if(s->external_clock && s->running){
+        uint32_t timeout=s->external_period*8u;
+        if(timeout<22050u)timeout=22050u;
+        if(timeout>88200u)timeout=88200u;
+        if(++s->external_elapsed>=timeout)xenolith_sequence_stop(s);
+    }
     s->frame.sample=s->sample_count++;
     s->frame.step_event=0u;s->frame.triggers=0u;s->frame.note_on=0u;s->frame.note_off=s->pending_off;s->pending_off=0u;
     s->frame.envelope_on=0u;
     s->frame.lane_mask=0u;
     if(s->running && s->image.config.enabled){
-        if(s->pending_start){s->pending_start=0u;enter_step(s,1u,1u);}
+        if(s->pending_start){s->pending_start=0u;enter_step(s,s->playhead==0u,1u);}
+        else if(s->external_clock){
+            if(s->external_steps){
+                --s->external_steps;s->playhead=(s->playhead+1u)%s->image.config.length;
+                enter_step(s,s->playhead==0u,0u);
+            }else if(!s->external_wait){
+                uint32_t next=s->phase+s->external_increment;
+                s->phase=next<s->phase?UINT32_MAX:next;
+            }
+        }
         else{
             uint32_t previous=s->phase;
             s->phase+=s->phase_increment;

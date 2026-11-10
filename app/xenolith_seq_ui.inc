@@ -278,6 +278,8 @@ static void seq_ui_draw(void)
         seq_ui_field(i,&name,value);label[0]='K';label[1]=(char)('1'+i);label[2]=' ';
         while(name[j]&&n<23u)label[n++]=name[j++];label[n]=0;
         cv_text(16,y+5,&FONT_XS,label,C_GRAY);
+        if(seq_ui_object==0u&&seq_ui_page==0u&&i==1u&&seq_external_clock&&seq_running)
+            cv_text(78,y+5,&FONT_XS,"EXT",C_AMB);
         if(text_w(&FONT_B,value)>106)cv_text(222-text_w(&FONT_XS,value),y+5,&FONT_XS,value,C_HI);
         else cv_text(222-text_w(&FONT_B,value),y+1,&FONT_B,value,C_HI);
         cv_line(16,y+27,223,y+27,C_LINE);

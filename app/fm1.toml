@@ -11,6 +11,6 @@ backup = true
 cpu2 = true
 cpu2_fallback = true
 tagline = "Xenolith I: independent FM cells and compact stereo exhaust"
-repo = "https://github.com/charlesvestal/fm1-base"
+repo = "https://github.com/CaptainChronosis/XENOLITH"
 licence = "GPL-3.0-or-later"
 credits = "XX29 Xenolith I on Charles Vestal fm1-base and felucca-bsp; source notices retained"
