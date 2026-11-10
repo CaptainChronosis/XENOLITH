@@ -6,68 +6,87 @@ current instrument; release and hardware verification live in their own receipts
 
 > **[Download XX29 Field Manual PDF](XENOLITH_FIELD_MANUAL.pdf)**
 
-## Section access
+## Section Access Graph & Navigation Matrix
 
-Start from HOME for the routes below. A hold is approximately 0.65 seconds.
-**HOME returns to the main page without resetting the sound.**
-SELECT means the push/turn encoder: pressing and rotating have distinct functions.
+Every page on Xenolith is reached from **[ HOME ]** by a single button press, a 650 ms hold, a two-button chord, or a **SELECT** encoder turn. Pressing **HOME** from any screen returns to **[ HOME ]** without resetting your sound, held notes, or reverb tail.
 
 ```text
-+--------------------------------------------------------------------------+
-| XENOLITH / SECTION ACCESS                                      XX29      |
-+--------------------------------------------------------------------------+
-HOME
- |-- SELECT turn ---> TONIC -> INDEX -> RATIO -> DRIFT
- |                    Turn back toward HOME, or press SELECT to return.
- |-- SELECT press --> VCA --SELECT--> WAVEFOLDER --SELECT--> HOME
- |-- hold HOME -----> ARRAY --EDIT--> COUPLING --EDIT--> ARRAY
- |
- |-- EDIT ----------> DIGITAL CORE --EDIT--> FILTER --EDIT--> HOME
- |    `-- hold EDIT -> CIRCUIT / filter component controls
- |
- |-- ENV -----------> ADSR
- |    |-- SELECT turn: AMP / FILTER / INDEX / TONIC
- |    `-- hold ENV --> ROUTE --ENV--> ADSR
- |
- |-- FX ------------> EXHAUST --FX--> TANK --FX--> HOME
- |    `-- hold FX ---> DIFFUSION --FX--> EXHAUST
- |
- |-- LFO -----------> MODULATION
- |    |-- SELECT turn: FUNCTION A / FUNCTION B / RANDOM / MIX
- |    |-- LFO: main <-> detail     SELECT press: global MOD on/off
- |    `-- RANDOM + hold LFO -----> MEMORY --LFO--> RANDOM main
- |
- |-- SEQ -----------> SEQUENCER
- |    |-- SELECT turn: SYSTEM / TONIC / CV1 / CV2 / CV3 / CV4
- |    `-- SELECT press: main <-> detail
- |
- |-- ARP -----------> KEY ASSIGN --SELECT press or turn--> RANGE
- |
- |-- GLO -----------> SPECTRUM --EDIT--> ANALYZER --EDIT--> SPECTRUM
- |    `-- hold GLO --> LOOKUP
- |
- |-- PRESETS turn --> PATCHES: turn for slot; PLAY loads
- |                    SAVE arms storage; SAVE again confirms.
- |
- `-- hold FX + REC -> LOAD ENGINE --SELECT press--> LOAD TIMING
-                      hold REC: LOAD pages <-> CORE pages
-                      SELECT press in CORE: EROSION <-> RELIEF
-                      SELECT turn on all four pages: ONSET
+                                  +-----------------------+
+                                  |       [ HOME ]        |
+                                  | K1 TONIC  K2 FM INDEX |
+                                  | K3 RATIO  K4 DRIFT    |
+                                  +-----------+-----------+
+                                              |
+      +-------------------+-------------------+-------------------+-------------------+
+      | TURN [SELECT]     | PRESS [SELECT]    | HOLD [HOME]       | TURN [ALGO]       |
+      v (Pages 1..4)      v (Cycle 1 -> 2)    v (650 ms)          v (Immediate)       |
++-----+-------+     +-----+--------+    +-----+--------+    +-----+--------+          |
+| [ TONIC ]   |     | 1. [ VCA ]   |    | [ ARRAY ]    |    | 1..64 CELLS  |          |
+| [ INDEX ]   |     |    [SELECT]  |    |   (CURRENT)  |    | (Live Count) |          |
+| [ RATIO ]   |     |       v      |    |  [EDIT]      |    +--------------+          |
+| [ DRIFT ]   |     | 2. [ FOLDER ]|    |     v        |                              |
++-------------+     +--------------+    | [ COUPLING ] |                              |
+                                        +--------------+                              |
+                                                                                      |
+      +-------------------+-------------------+-------------------+-------------------+
+      |                   |                   |                   |
+      | [EDIT]            | [FX]              | [ENV]             | [GLO]
+      v                   v                   v                   v
++-----+----------+  +-----+----------+  +-----+----------+  +-----+----------+
+| 1x: [DIGITAL]  |  | 1x: [EXHAUST]  |  | 1x: [ENVELOPE] |  | 1x: [ANALYZER] |
+| 2x: [FILTER]   |  | 2x: [TANK]     |  |   (Turn SELECT |  |  + [EDIT]:     |
+| 3x: [HOME]     |  | 3x: [HOME]     |  |    AMP/FLT/..) |  |    [FFT SETUP] |
+|                |  |                |  |                |  |                |
+| HOLD (650 ms): |  | HOLD (650 ms): |  | HOLD (650 ms): |  | HOLD (650 ms): |
+|   [CIRCUIT]    |  |   [DIFFUSION]  |  |   [ENV ROUTE]  |  |   [LOOKUP]     |
++----------------+  +----------------+  +----------------+  +----------------+
 
-PLAY       Drone on/off, or transport for an enabled sequence.
-REC        Arm/end recording.
-HOME + REC Stop transport and clear sound/tails; retain the recorded take.
-+--------------------------------------------------------------------------+
+      +-------------------+-------------------+-------------------+-------------------+
+      | [LFO]             | [SEQ]             | [ARP]             | [PRESETS] / [SAVE]|
+      v                   v                   v                   v                   |
++-----+----------+  +-----+----------+  +-----+----------+  +-----+----------+        |
+| 1x: [MOD MAIN] |  | 1x: [SEQ]      |  | 1x: [KEYBOARD] |  | Turn [PRESETS]:|        |
+| 2x: [MOD DTL]  |  |  Turn [SELECT]:|  |  Press [SELECT]|  |   [PATCHES]    |        |
+|  Turn [SELECT]:|  |  SYS/NOTE/CV1-4|  |  Range/Spectral|  |   [PLAY]=Load  |        |
+|  A/B/RAND/MIX  |  |  Press [SELECT]|  +----------------+  |                |        |
+|                |  |  Main / Detail |                      | Press [SAVE]:  |        |
+| HOLD on RAND:  |  +----------------+                      |   1x: Arm Slot |        |
+|  [RAND MEMORY] |                                          |   2x: Confirm  |        |
++----------------+                                          +----------------+        |
+                                                                                      |
+      +---------------------------------------+---------------------------------------+
+      | CHORD: [FX] held + [REC]              | CHORD: [HOME] + [REC]
+      v                                       v
++-----+--------------------------------+  +---+---------------------------------------+
+| [ LOAD ENGINE ] (Governor)           |  | ! PANIC !                                 |
+|  Press [SELECT]: Timing / Detail     |  |  Stops transport/REC, mutes voice & clears|
+|  Hold [REC] (650 ms): Core / FX Sag  |  |  tank tail; preserves recorded SEQ take.  |
++--------------------------------------+  +-------------------------------------------+
 ```
 
-**Filter shortcut:** HOME -> EDIT -> EDIT. Rotate SELECT to select placement;
-OFF bypasses the filter. Press SELECT to choose cutoff sensitivity.
-For CIRCUIT, leave ARRAY/COUPLING with HOME before holding EDIT: EDIT is reserved
-for switching those two array pages while they are open.
+### Direct Button-to-Section Reference
 
-In ARRAY, SELECT press switches CURRENT/GLOBAL, SELECT turn chooses attachment,
-and **holding SELECT in GLOBAL adopts the preview**. On the plain SPECTRUM
-page, PRESETS changes the analysis tap instead of opening patch storage.
+| Panel Control | Action | Opens / Controls | Inside-Page Sub-Navigation |
+| :--- | :--- | :--- | :--- |
+| **`HOME`** | **Short Press** | **`[ CORE ARRAY ]` (Home)** | Returns to main `TONIC` / `INDEX` / `RATIO` / `DRIFT` view from any page. |
+| **`HOME`** | **Hold (650 ms)** | **`[ ARRAY ]` (Topology)** | • **Press `EDIT`**: Toggles **`[ COUPLING ]`** (`FLAVOUR` / `BIAS` / `LAG` / `ALLPASS` / `COMMON`).<br>• **Short `SELECT`**: Toggles `CURRENT` (`ADD`) $\leftrightarrow$ `GLOBAL` (`ALL`) preview.<br>• **Hold `SELECT` (in `GLOBAL`)**: Adopts uniform `GLOBAL` topology into `CURRENT`.<br>• **Turn `SELECT`**: Selects `AUTO` or manual source anchor `C01..C64`. |
+| **`SELECT` (on `HOME`)** | **Turn Encoder** | **`[ TONIC / INDEX / RATIO / DRIFT ]`** | Scrolls through the 4 Home Detail pages (`GLIDE`, `PARAPHONY`, `FM TYPE`, `SNAP`, `SPREAD X`). **Short `SELECT`** returns to `HOME`. |
+| **`SELECT` (on `HOME`)** | **Short Press** | **`[ VCA ]` $\to$ `[ WAVEFOLDER ]`** | • **1st Press**: `[ VCA ]` (`DRIVE`, `BIAS`, `COLOUR`, `DEGEN`; turn `SELECT` for curve).<br>• **2nd Press**: `[ WAVEFOLDER ]` (`FOLD`, `BIAS`, `STAGES`, `MIX`).<br>• **3rd Press**: Returns to `[ HOME ]`. |
+| **`EDIT`** | **Short Press** | **`[ DIGITAL CORE ]` $\to$ `[ FILTER ]`** | • **1st Press**: `[ DIGITAL CORE ]` (`MAX KHZ`, `FRAC BITS`, `QUANTIZER`, `RECON`; press `SELECT` for rate knob law).<br>• **2nd Press**: `[ FILTER ]` (`CUTOFF`, `MODE`, `TOPOLOGY`, `RESONANCE`; turn `SELECT` for placement; press `SELECT` for cutoff knob law).<br>• **3rd Press**: Returns to `[ HOME ]`. |
+| **`EDIT`** | **Hold (650 ms)** | **`[ CIRCUIT ]` (Triode / Twin-T)** | Edits `CATHODE R`, `HEADROOM`, `COUPLING`, `T BALANCE`. Turn `SELECT` for filter placement. |
+| **`FX`** | **Short Press** | **`[ EXHAUST ]` $\to$ `[ TANK ]`** | • **1st Press**: `[ EXHAUST ]` (`ECHO MS`, `DAMP HZ`, `TAIL S`, `MIX %`).<br>• **2nd Press**: `[ TANK ]` (`WET KHZ`, `STRUCTURE`, `DIFFUSION`, `WIDTH %`).<br>• **3rd Press**: Returns to `[ HOME ]`. (**Press `SELECT`** on Page 1/2 toggles `ZOH`/`LINEAR`). |
+| **`FX`** | **Hold (650 ms)** | **`[ DIFFUSION ]` (Tank Allpass)** | Edits `INPUT %`, `TANK A %`, `TANK B %`, `SCALE` (`1/4`, `1/2`, `1`). |
+| **`FX` + `REC`** | **2-Button Chord** | **`[ LOAD ENGINE ]` (Governor)** | • **Press `SELECT`**: Toggles Timing vs. Detail page (`ONSET %` on `SELECT` turn).<br>• **Hold `REC` (650 ms)**: Toggles Effect Sag vs. Core Relief pages. |
+| **`ENV`** | **Short Press** | **`[ ENVELOPE ]` (ADSRs 1–4)** | **Turn `SELECT`** to choose `AMP`, `FILTER`, `INDEX`, or `TONIC` ADSR. Press `ENV` again to exit. |
+| **`ENV`** | **Hold (650 ms)** | **`[ ENV ROUTE ]`** | Edits `DESTINATION`, `DEPTH`, `TRIGGER` (`KEY`/`SEQ`/`BOTH`), and `ENABLE` for the selected envelope. |
+| **`LFO`** | **Short Press** | **`[ MODULATION ]`** | • **Turn `SELECT`**: Selects face (`FUNC A`, `FUNC B`, `RANDOM`, `MIX`).<br>• **Press `LFO`**: Toggles Main $\leftrightarrow$ Detail page for that face.<br>• **Press `SELECT`**: Globally bypasses / enables modulation. |
+| **`LFO` (on `RANDOM`)** | **Hold (650 ms)** | **`[ RANDOM MEMORY ]`** | Edits distribution `LAW` (`CURRENT`/`BELL`/`EDGE`/`BINARY`), `MEMORY` (`2–32`), `RENEW %`, and `BIAS`. |
+| **`SEQ`** | **Short Press** | **`[ SEQUENCER ]`** | • **Turn `SELECT`**: Selects `SYSTEM`, `TONIC NOTES`, or `CV 1..4`.<br>• **Press `SELECT`**: Toggles Main $\leftrightarrow$ Detail page for the selected object. |
+| **`ARP`** | **Short Press** | **`[ KEYBOARD ]` (Assign / ANS)** | Edits `DESTINATION`, `GLOBAL`/`ANS CELLS`, `LATCH`, `KEY GATE`. **Press `SELECT`** for Range / Spectral Layout page. |
+| **`GLO`** | **Short Press** | **`[ ANALYZER ]` (FFT / Scope)** | • **Turn `PRESETS`**: Selects `L` / `R` / `MID` tap.<br>• **Press `EDIT` (while in `GLO`)**: Opens `[ FFT SETUP ]` (`SPAN`, `TAP`, `FPS`, `SIZE`). |
+| **`GLO`** | **Hold (650 ms)** | **`[ LOOKUP ]` (Sine Table)** | Edits `TABLE POINTS` (`4–2048`), `INTERP` (`ZOH`/`LINEAR`), `HARMONIC` (`3y-4y^3`), and `TARGET` (`MOD`/`CAR`/`BOTH`). |
+| **`PRESETS` / `SAVE`** | **Turn / Press** | **`[ PATCHES ]` (Slots 01–16)** | • **Turn `PRESETS`**: Opens slot browser (`01–16`); **`PLAY`** recalls selected slot.<br>• **Press `SAVE`**: Arms save; **2nd `SAVE`** commits to slot (`HOME` cancels). |
+| **`HOME` + `REC`** | **2-Button Chord** | **`PANIC`** | Stops transport & recording, mutes voices, and clears reverb tank while keeping recorded sequence steps. |
 
 Direct sections:
 [HOME / array](#home-and-oscillator-array) |
