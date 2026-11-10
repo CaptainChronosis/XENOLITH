@@ -1,0 +1,8 @@
+{
+  "original_template": "https://github.com/charlesvestal/fm1-base",
+  "original_template_revision": "d8ff8f41aa511e03d70a7c565c9fa0f1dd18ae2f",
+  "original_signal_source": "Operator SuperCollider DSP_v1.46 Xenolith patch (not bundled)",
+  "source_role": "Complete application source for the accompanying 601c8d1b firmware; concrete modified dependencies are under vendor/fm1-base",
+  "current_build": "../evidence/BUILD.json",
+  "licences": "THIRD_PARTY.md"
+}

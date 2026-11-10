@@ -1,0 +1,30 @@
+{
+  "retrieved_on": "2026-10-30",
+  "installer_url": "https://jl-update.oss-cn-shenzhen.aliyuncs.com/2.5.3.exe",
+  "source_documentation": "https://github.com/m-vave/fm1_open/blob/4c7496daac04a95ff10d1afdcc8f9ead2dbabc41/README.md",
+  "installer_executed": false,
+  "installation": "Extracted with portable innoextract 1.9 into project-local directory; no global PATH or registry change.",
+  "compiler_version": "PI32v2 clang 4.0.1; JieLi Windows toolchain 2.5.3, target pi32v2 r3",
+  "upstream_toolchain_validation": "All 22 files checked by unmodified fm1_open sdk/Build.ps1 against sdk/manifest.json.",
+  "extractor_source": "https://constexpr.org/innoextract/",
+  "extractor_url": "https://constexpr.org/innoextract/files/innoextract-1.9-windows.zip",
+  "files": [
+    {
+      "path": "2.5.3.exe",
+      "bytes": 52860672,
+      "sha256": "399bd518a28e47a7a0394506cebd5bf658748a58cd6b7c02512e24b4b88c5a5e"
+    },
+    {
+      "path": "bin/clang.exe",
+      "bytes": 25829376,
+      "sha256": "d4bc97cf421c1ccc373dd8924ce88720ff7457b3f1478d15df4aeda6ae923bce"
+    },
+    {
+      "path": "innoextract-1.9-windows.zip",
+      "bytes": 520705,
+      "sha256": "6989342c9b026a00a72a38f23b62a8e6a22cc5de69805cf47d68ac2fec993065"
+    }
+  ],
+  "firmware_source_commit": "4c7496daac04a95ff10d1afdcc8f9ead2dbabc41",
+  "hardware_access": false
+}

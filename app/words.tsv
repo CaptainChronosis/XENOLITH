@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: MPL-2.0
+# url: https://example.invalid/xx29/xenolith1/words/
+# Local-only probe: this dictionary is generated locally and is not published.
+XENOLITH I	Xenolith one
+K1 PITCH HZ	knob one, pitch in Hertz
+K2 FM INDEX	knob two, FM index
+K3 FM RATIO	knob three, FM ratio
+K4 DRIFT %	knob four, drift amount
+DRONE ON	drone on
+STOPPED	stopped

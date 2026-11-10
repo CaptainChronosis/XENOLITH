@@ -1,0 +1,16 @@
+name = "XENOLITH1"
+id_prefix = "FM-1_290"
+usb_manufacturer = "XX29"
+usb_product = "XENOLITH"
+o2 = ["xenolith_core.c", "xenolith_analysis.c", "xenolith_exhaust.c", "xenolith_lights.c", "xenolith_envelope.c", "xenolith_quality.c", "xenolith_patches.c", "xenolith_modulation.c", "xenolith_sequence.c", "xenolith_keyboard.c", "xenolith_paraphony.c", "xenolith_amplifier.c", "xenolith_filter.c", "xenolith_envelope_bank.c", "xenolith_random_memory.c", "xenolith_dispersion.c", "xenolith_governor.c"]
+words = "words.tsv"
+gen = ["tools/gen_vt323.py {gen}/felucca_font.h"]
+fontset = "VT323"
+ble = false
+backup = true
+cpu2 = true
+cpu2_fallback = true
+tagline = "Xenolith I: independent FM cells and compact stereo exhaust"
+repo = "https://github.com/charlesvestal/fm1-base"
+licence = "GPL-3.0-or-later"
+credits = "XX29 Xenolith I on Charles Vestal fm1-base and felucca-bsp; source notices retained"

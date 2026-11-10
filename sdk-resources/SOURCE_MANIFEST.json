@@ -1,0 +1,35 @@
+{
+  "repository": "https://gitee.com/Jieli-Tech/fw-AC79_AIoT_SDK",
+  "commit": "d179b4484759423312073f5fbb232501aa491047",
+  "retrieved_on": "2026-10-30",
+  "license": "Apache-2.0; LICENSE retained",
+  "scope": "Only three package resources plus root LICENSE; no Bluetooth libraries or complete SDK.",
+  "verification": "All three resource hashes match pinned fm1-base SDK_SHA256; adapter fails on mismatch.",
+  "fallback": "Upstream get_sdk.sh GitHub URLs returned 404; official JieLi Gitee mirror served the exact pinned bytes.",
+  "files": [
+    {
+      "path": "cpu/wl82/tools/uboot.boot",
+      "bytes": 14536,
+      "sha256": "4e3b4c220dc96641cb5a723f41e68ce41d5261ae9434bb33fbd7f2c59976ded4",
+      "url": "https://gitee.com/Jieli-Tech/fw-AC79_AIoT_SDK/raw/d179b4484759423312073f5fbb232501aa491047/cpu/wl82/tools/uboot.boot"
+    },
+    {
+      "path": "cpu/wl82/tools/cfg_tool.bin",
+      "bytes": 383,
+      "sha256": "276579954f076886a6a7694f65dc71c034a63a2c204b76749065c0ac7b010d1b",
+      "url": "https://gitee.com/Jieli-Tech/fw-AC79_AIoT_SDK/raw/d179b4484759423312073f5fbb232501aa491047/cpu/wl82/tools/cfg_tool.bin"
+    },
+    {
+      "path": "cpu/wl82/tools/cfg/eq_cfg_hw.bin",
+      "bytes": 655,
+      "sha256": "41167491bffed4651750719c973d2758adeb9021a5670d02d6a53c85ed80ea7d",
+      "url": "https://gitee.com/Jieli-Tech/fw-AC79_AIoT_SDK/raw/d179b4484759423312073f5fbb232501aa491047/cpu/wl82/tools/cfg/eq_cfg_hw.bin"
+    },
+    {
+      "path": "LICENSE",
+      "bytes": 11357,
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+      "url": "https://gitee.com/Jieli-Tech/fw-AC79_AIoT_SDK/raw/d179b4484759423312073f5fbb232501aa491047/LICENSE"
+    }
+  ]
+}

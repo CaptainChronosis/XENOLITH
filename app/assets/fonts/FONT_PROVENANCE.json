@@ -1,0 +1,19 @@
+{
+  "family": "VT323",
+  "version": "2.000",
+  "copyright": "Copyright 2011, The VT323 Project Authors (peter.hull@oikoi.com)",
+  "license": "OFL-1.1",
+  "license_file": "OFL.txt",
+  "font_file": "VT323-Regular.ttf",
+  "font_sha256": "cf4de751ada78ceac033dbe16a687742939995b77bc2a052ae17a4957958594d",
+  "license_sha256": "27d9af34210253e7ca1251fbace86c6f65b40031d6ce1a75493a1b2093631298",
+  "source_repository": "https://github.com/google/fonts",
+  "source_commit": "eb8781e516576b414603df8cd267c0f21c9b4ee2",
+  "source_path": "ofl/vt323/VT323-Regular.ttf",
+  "font_git_blob": "afa69098f15bf64849d397f133d9467486904053",
+  "license_git_blob": "bcb092f7e62f6e0455177e95e75cf8a6b822911f",
+  "source_url": "https://github.com/google/fonts/tree/eb8781e516576b414603df8cd267c0f21c9b4ee2/ofl/vt323",
+  "verification": "Local font size and Git blob match the primary repository's pinned contents response; local license retained unchanged.",
+  "rasterizer": "tools/gen_vt323.py; Pillow BASIC layout; 4-bit alpha; app-local generated felucca_font.h",
+  "scope": "Xenolith only; framework/default font assets remain unchanged"
+}

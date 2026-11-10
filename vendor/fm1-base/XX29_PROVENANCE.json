@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "name": "XX29 FM-1 platform",
+  "established_date": "2026-11-01",
+  "scope": "Independent local fm1-base fork with pinned felucca-bsp; not the full Felucca instrument",
+  "branch": "xx29/platform",
+  "upstream": "https://github.com/charlesvestal/fm1-base.git",
+  "upstream_base_revision": "d8ff8f41aa511e03d70a7c565c9fa0f1dd18ae2f",
+  "bsp": {
+    "path": "bsp",
+    "branch": "xx29/platform",
+    "upstream": "https://github.com/hugelton/felucca-bsp",
+    "revision": "305c372c3ec18f3917744e608998a0d7fd700135"
+  },
+  "source_original": "04_WORKBENCH/fm1-base",
+  "git_storage": "Independent local clones made with --no-hardlinks; BSP absorbed as this repository's submodule",
+  "automatic_updates": false,
+  "remote_publication": false,
+  "physical_hardware_access": false,
+  "fork_creation_code_changes": false,
+  "maintenance": "Review and selectively apply upstream fixes; no release tracking or automatic rebase required"
+}

@@ -1,0 +1,340 @@
+{
+  "firmware": "firmware/XENOLITH1.fwsc",
+  "sha256": "601c8d1bbf6e2697e742238c2d73bd1b7c362228014ce3267eb8573ba6485202",
+  "bytes": 611496,
+  "build_date": "2026-11-10T02:22:50.595897+00:00",
+  "platform_input_sha256": "9ca37138133c26f4e8243842de5c03bf8a7c33ae95b17726fd71253f07706d7b",
+  "platform_revisions": [
+    {
+      "path": ".",
+      "revision": "9a97e2c59bc54317b201210b91f9365e207eba6a"
+    },
+    {
+      "path": "bsp",
+      "revision": "305c372c3ec18f3917744e608998a0d7fd700135"
+    }
+  ],
+  "build_exit_code": 0,
+  "emulator_smoke_seconds": 8,
+  "emulator_exit_code": 0,
+  "physical": {
+    "scope": "100-second mixer ADC capture of exact candidate; automated measurements, no listening claim",
+    "sample_duration_seconds": 99.973,
+    "peak_dbfs": -19.677,
+    "rail_samples": 0,
+    "late_delta": 0,
+    "repeated_dma_delta": 0,
+    "output_fallback_delta": 0,
+    "core_hold_delta_audible_scenes": 0,
+    "core_hold_delta_stopped_cleanup": 34,
+    "coverage": "eight-cell methods; 64-cell NORMAL, flavours, COMMON and EXP/ALLPASS; final device stopped at eight PARALLEL cells, 44.1k; no patch save"
+  },
+  "limitations": [
+    "No claim of physical testing on newer UC25HQ80 flash variant.",
+    "Install identity acknowledgement is not a flash-image hash readback.",
+    "Portable updater wrapper has offline tests; its own physical install is not yet tested."
+  ],
+  "compiled_application_inputs": [
+    {
+      "path": "app/app.c",
+      "sha256": "39ec863f7929c89178c5dc5c387dbe30f0dfedf986df1c30a2816bfbb1582c81"
+    },
+    {
+      "path": "app/app.h",
+      "sha256": "84be964c314e756ba1144e71544e73443f881a4a17dc8d4d149f8eccabcb095c"
+    },
+    {
+      "path": "app/assets/fonts/VT323-Regular.ttf",
+      "sha256": "cf4de751ada78ceac033dbe16a687742939995b77bc2a052ae17a4957958594d"
+    },
+    {
+      "path": "app/fm1.toml",
+      "sha256": "669dda5faed073f4c1e847644317c7cec08f40c2533f01e0ddc778d48ee56a8e"
+    },
+    {
+      "path": "app/tests/test_core_performance.c",
+      "sha256": "dee7bf9cc4c787b37e2b6b24eb9f6209187b7e692590d2d9968a3ca22ec63940"
+    },
+    {
+      "path": "app/tests/verify_core_performance.py",
+      "sha256": "ab07347fcc0d3fab080470350014b65c5826f5bd7d1d7e35fb49e1d6a6112e66"
+    },
+    {
+      "path": "app/tools/gen_vt323.py",
+      "sha256": "e5987f9df17eb0c14ccc80c2d4263ab720688916e39bd634f5f1cedbdbbf575f"
+    },
+    {
+      "path": "app/words.tsv",
+      "sha256": "a7f5f408b408454ca2327eb1cae5a75a7dad81ab187fb6fba6299bb538038fd0"
+    },
+    {
+      "path": "app/xenolith_admission.h",
+      "sha256": "0abcb274345b0ac4c010c869385e25f1d6115fc732ef55d0a53af6172f149433"
+    },
+    {
+      "path": "app/xenolith_amplifier.c",
+      "sha256": "fc481b7429595e859cd58d171868a30ec46ff214482abbeb7729dcefb17eca82"
+    },
+    {
+      "path": "app/xenolith_amplifier.h",
+      "sha256": "5715e7681d2c3ac34ac909bf8ae9391a6ddbcde39c31b9da6bca5973f80e3554"
+    },
+    {
+      "path": "app/xenolith_amplifier_tables.inc",
+      "sha256": "84dc8c7fc46debb1bf92ce0b5facf20ee422367b70cb99e13ef14a5691dad360"
+    },
+    {
+      "path": "app/xenolith_analysis.c",
+      "sha256": "c77d50155a9e93ca3e026b79843b76618d07063f73942570f595dbe0ae701823"
+    },
+    {
+      "path": "app/xenolith_analysis.h",
+      "sha256": "f2f051fad0a12dbb5c5f31ced2ff11b16b88e678bee33f363b841b3cfce497a9"
+    },
+    {
+      "path": "app/xenolith_analysis_table.h",
+      "sha256": "e8516c6a9798ad1e66b52f8e48e922f1af9960f943544d885ac2172b902b965f"
+    },
+    {
+      "path": "app/xenolith_analysis_worker.inc",
+      "sha256": "fa5a250c69d8ba319b38206b4d9edf3af2f265c5c3f3a0a813f23db20f8d4d5b"
+    },
+    {
+      "path": "app/xenolith_boot.inc",
+      "sha256": "ee3245ca9a9fad6f1022d96b11df33d18a0e131d4e6461c3e119f15183ea9ebb"
+    },
+    {
+      "path": "app/xenolith_control_response.h",
+      "sha256": "b76ae48258fe1d1bd8c4bd9bd9e4e37b5483a5c8ea2c5cbee074e16f343babcd"
+    },
+    {
+      "path": "app/xenolith_controls.h",
+      "sha256": "99040af0b1edd4d18b7068ad674737324fe4d766db5a7eb12caad1fe210d422e"
+    },
+    {
+      "path": "app/xenolith_core.c",
+      "sha256": "6af25519439b0bebdcecd18938f6b6e40f25e9f801bde1fcc247228219d789ca"
+    },
+    {
+      "path": "app/xenolith_core.h",
+      "sha256": "12d0379d8586953b0f2ff6c2bc2d7e15869aa77ef2f51fa3a245d90618ca696a"
+    },
+    {
+      "path": "app/xenolith_count_spread.inc",
+      "sha256": "841f64175ba533e616afc99e799a7ac264bd86459624f4a243800c920d674fcc"
+    },
+    {
+      "path": "app/xenolith_coupling.h",
+      "sha256": "3ec3521ffcb0f3db440a745d559313e7b03615758cb809b53ed1f1ddf1312a42"
+    },
+    {
+      "path": "app/xenolith_coupling_ui.inc",
+      "sha256": "86ae81beee4c821807cb4598fd6da5c53408f781fe701f8b9f33ff3b72beb60a"
+    },
+    {
+      "path": "app/xenolith_deep_ui.inc",
+      "sha256": "283822384f494fe686334085e2856d7623ab78b8141f3da33f6f5c8a681e0f2a"
+    },
+    {
+      "path": "app/xenolith_dispersion.c",
+      "sha256": "d01bce208cce65ef43853137e9de2aeb31c69fe5dc4a87c381708b9c6dc47fdf"
+    },
+    {
+      "path": "app/xenolith_dispersion.h",
+      "sha256": "dbc4549459b55875c99af609e37b30d1a897be001c9a9c1ca6ba588b68ea1694"
+    },
+    {
+      "path": "app/xenolith_envelope.c",
+      "sha256": "44aebea634a777a3c7ab6f07637547c017c687ba1fd5c4c860e768b4f88e598c"
+    },
+    {
+      "path": "app/xenolith_envelope.h",
+      "sha256": "ae7462b409bac88912aee3a9b3c9af22e5b7af2958fbb15707f22e66c590e70b"
+    },
+    {
+      "path": "app/xenolith_envelope_bank.c",
+      "sha256": "f87ab67323a6d8a97090c2f582709db0833adfa28fc7626a4b33f859d744dbf4"
+    },
+    {
+      "path": "app/xenolith_envelope_bank.h",
+      "sha256": "84424745ae7b85836a399bab22b11e29f86a5e4e5c1d977e643c4b41d6fb090c"
+    },
+    {
+      "path": "app/xenolith_exhaust.c",
+      "sha256": "67bed1e2e48a12300be1b2cc86ccd4392b8f5355c2eae333ebc7f5d4e0ca8b1c"
+    },
+    {
+      "path": "app/xenolith_exhaust.h",
+      "sha256": "ab10784dda721b1e54223a81d49de52d86b328a988501ec0e528fc0942e7ee0a"
+    },
+    {
+      "path": "app/xenolith_filter.c",
+      "sha256": "1568d667504c4190d0572251375ed6f643e93061bfd38adab128943547005e67"
+    },
+    {
+      "path": "app/xenolith_filter.h",
+      "sha256": "25e2cb03086768942794b44a7981cb7b6ab4550cc18f2d765dc2c02f677c358f"
+    },
+    {
+      "path": "app/xenolith_filter_env_ui.inc",
+      "sha256": "fe28a826e7f1853d5f699f93d1bb772a526e4e93e1704dc4e0dce9134333ed7b"
+    },
+    {
+      "path": "app/xenolith_flavour.h",
+      "sha256": "66efcb47a3d3eba97cac6c7cdb2335d6f9424315b1993aa96cf0a5437d18ec99"
+    },
+    {
+      "path": "app/xenolith_folder_tables.inc",
+      "sha256": "5f404d7aec169180bf945ff3175aef1a3d02f65302405aa457d181202546f984"
+    },
+    {
+      "path": "app/xenolith_governor.c",
+      "sha256": "f35433c7dbd2a846e38bfbdc57bfa69a37e604f5d42f9c2d6ba1bec2eb541109"
+    },
+    {
+      "path": "app/xenolith_governor.h",
+      "sha256": "5338633a31d5b56fb17dcf87479322cb1881b0845e091c6525d1002e27c98ca1"
+    },
+    {
+      "path": "app/xenolith_governor_ui.inc",
+      "sha256": "acff4f9e7aae6159456fe2ac1e71f0d3211511ed7017a3a2326aa3d6486103ad"
+    },
+    {
+      "path": "app/xenolith_graph.h",
+      "sha256": "6ae04c4e25b950035d7e068a69cc56a30258e8b63923dfd3f7055a683bdc08ca"
+    },
+    {
+      "path": "app/xenolith_graph_editor.h",
+      "sha256": "db7ee32c693ca7a44ba21866409745ac71303d29dc1183faa8b6a958ec33ffb9"
+    },
+    {
+      "path": "app/xenolith_home_detail.inc",
+      "sha256": "1ddda8e685a6141b8a8cd4b19d2577c3e8e74590837159670d8f91594de5f09c"
+    },
+    {
+      "path": "app/xenolith_keyboard.c",
+      "sha256": "2d30b9561ff899988ce8fffb759d820eb6da8a9b06ed561e9c6aba443ac03ece"
+    },
+    {
+      "path": "app/xenolith_keyboard.h",
+      "sha256": "d206afd70e6b57abc4a106400f767f2953f7308ae77ae93ba84a61e453becef5"
+    },
+    {
+      "path": "app/xenolith_keyboard_ui.inc",
+      "sha256": "e24f33ac1ea3cef2c5bfb28a8bb9a18cf118a8f506e57762d8525d142eed433e"
+    },
+    {
+      "path": "app/xenolith_lights.c",
+      "sha256": "71e960aebaa9f9edc62cc514285e9dc2f1ffd2b1f557719c6188726f802af6d2"
+    },
+    {
+      "path": "app/xenolith_lights.h",
+      "sha256": "309dbfc5f2deb884d1026a36bc1bd1ebba90a6f0f1e7b0efcb86d10f2e576847"
+    },
+    {
+      "path": "app/xenolith_load_lamp.h",
+      "sha256": "f489c9bfbf6e8dc0a080ac923c322b6beca56c52fe8ff7aad386bc2d8c6afe16"
+    },
+    {
+      "path": "app/xenolith_mod_motion.inc",
+      "sha256": "8392437f889512405cb05cfebe853f88630f5a8bfcac6153e4f15d891f2eb436"
+    },
+    {
+      "path": "app/xenolith_mod_ui.inc",
+      "sha256": "72dd616ea7398a0f23a64fcc27c902c499372f8058146683262a9b0c18ada794"
+    },
+    {
+      "path": "app/xenolith_modulation.c",
+      "sha256": "25e8293aaf77d9d3a45bc08991dc9a4ee3a446f9bdea1651b9550f8f6e935e15"
+    },
+    {
+      "path": "app/xenolith_modulation.h",
+      "sha256": "9e63def3d5a2eed98aa77accbce97b6d4d759ba904b443e5ee9d730faa0201b1"
+    },
+    {
+      "path": "app/xenolith_paraphony.c",
+      "sha256": "702ecd9f39a1b97ae6b541ea6624a9ddefd9d1dbc7639eff65d6e7ff6275eb7c"
+    },
+    {
+      "path": "app/xenolith_paraphony.h",
+      "sha256": "f5df7f814a79017ec383c41b83f76f465cdf6306bf8ba7e12f3427242710e24f"
+    },
+    {
+      "path": "app/xenolith_patches.c",
+      "sha256": "e8294338af1ff7d17f50eb1a7775869f74c6fac9c7b01537fa7f050e229af50f"
+    },
+    {
+      "path": "app/xenolith_patches.h",
+      "sha256": "51826669c678b2e111d3db61b59a368aeedf5fd865e5772df6922683cd81bfff"
+    },
+    {
+      "path": "app/xenolith_performance.h",
+      "sha256": "5e0adcd69c14a14e088a156b43564ddeedea6bdd97727f309f9377833f21bd99"
+    },
+    {
+      "path": "app/xenolith_quality.c",
+      "sha256": "49868fd9c54efdc6409484cbb7c49959d3f994f50512dd9cd5a0fc2dac2e0874"
+    },
+    {
+      "path": "app/xenolith_quality.h",
+      "sha256": "d4bcdfa0dc162173ec2bac7d8da07e078083ad7a653fa2598969b8b5d4e72cbb"
+    },
+    {
+      "path": "app/xenolith_random_memory.c",
+      "sha256": "03b9d2fa3392e14f2f90de0cb59ea91e287792b00231297f9809800f9aa425c7"
+    },
+    {
+      "path": "app/xenolith_random_memory.h",
+      "sha256": "f0591c8c373776bac26cad153da5ef14f00bc6373d64240d76175f77543443ab"
+    },
+    {
+      "path": "app/xenolith_rate_response.h",
+      "sha256": "bb1a08e19edbac3c62f49182f56496539b2b84e09247dddff549bd95270d5b5d"
+    },
+    {
+      "path": "app/xenolith_ratio.h",
+      "sha256": "a156b4333896f50af81af04da1d59c6078de1ade7f847289525b80375ded7990"
+    },
+    {
+      "path": "app/xenolith_seq_ui.inc",
+      "sha256": "da652d85990bb02637544edf01880c94d95c9ff951fbf7dc559ffbdd041d42ae"
+    },
+    {
+      "path": "app/xenolith_sequence.c",
+      "sha256": "186692415aafb355c805a4a5864aff9991c5beddd6bac0171d1ddd0e683c2839"
+    },
+    {
+      "path": "app/xenolith_sequence.h",
+      "sha256": "092f33d56553d8756b736660562898c1a59f887cf83730da9a733f708e7436a6"
+    },
+    {
+      "path": "app/xenolith_sine_table.h",
+      "sha256": "17559d89d1e8ec11218425ee1f3009a0e23b8146d685fbf68d398ce6073dc537"
+    },
+    {
+      "path": "app/xenolith_storage.inc",
+      "sha256": "9223647a5ce5e6926f67976447e47c8c560700282acf6a5f127a68b116099436"
+    },
+    {
+      "path": "app/xenolith_topology_ui.inc",
+      "sha256": "9bb5d7784f07bffa8b3e29b45c092ace31ea005363a4ce8512020a6ee73c07f8"
+    },
+    {
+      "path": "app/xenolith_view.inc",
+      "sha256": "9faa59ae072d6e2a7bc776040feb2dec051b32246b8e904a9ee5d08ef75ee0d4"
+    }
+  ],
+  "portable_source_rebuild": {
+    "matched": true,
+    "sha256": "601c8d1bbf6e2697e742238c2d73bd1b7c362228014ce3267eb8573ba6485202",
+    "compiler": "JieLi Windows 2.5.3",
+    "scope": "Isolated exported source tree rebuilt; exact firmware bytes match."
+  },
+  "portable_installer_offline_tests": {
+    "wrapper_tests": 8,
+    "wrapper_passed": 8,
+    "pinned_protocol_test_exit_code": 0,
+    "device_io": false,
+    "protocol_cross_language_fixture": "skipped; requires prepared template package"
+  }
+}

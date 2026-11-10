@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "assertions": 566,
+  "scope": "Host mocks compile actual platform button functions. No target or physical claim.",
+  "source_sha256": {
+    "device\\plat_fm1.c": "cca26d2988de9366328ffd8a5b50aec8bfc89437b429ecbd92dd8a980f2c1841",
+    "host\\plat_host.c": "011ae7931b1b44cee5bcc58ae513c2d348adb973b1ef84e63ea0a0d4f6da8a0b",
+    "include\\plat.h": "79c79011f7f34a29fa2f3adc603284b74916fa43b3fbbee794ba93704b3e0ce1",
+    "tests\\button_snapshot_test.py": "7c72490f1285e4f7856defeacf2b5b8affea7d21177df70611403e4a4e267d8d",
+    "tests\\button_snapshot_test.c": "953c4f71e817fd2b214522b27a4488cd0d7349eadfef978e0c644b84fd17defe"
+  }
+}
