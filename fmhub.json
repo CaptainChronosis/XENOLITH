@@ -1,5 +1,5 @@
 {
-  "what": "An experimental FM cell synthesizer with mixed oscillator routing, modulation, sequencing, a vintage circuit-derived filter, VCA, wavefolding and stereo reverb.",
+  "what": "An experimental mono-track FM cell synthesizer with programmable oscillator routing, modulation, sequencing, a vintage circuit-derived filter, VCA, wavefolding, digital fidelity reduction and reverb. A load engine models physical voltage sag and progressively shrinks resource usage under stress.",
   "author": "Unit_v743",
   "kinds": [
     "synth"
