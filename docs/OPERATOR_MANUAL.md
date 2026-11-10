@@ -4,6 +4,8 @@ Xenolith is a cell-based FM instrument with a shared signal path. Begin with HOM
 then open the individual sections as needed. The controls below describe the
 current instrument; release and hardware verification live in their own receipts.
 
+> **[Download XX29 Field Manual PDF (older version)](XENOLITH_FIELD_MANUAL.pdf)**
+
 ## Section access
 
 Start from HOME for the routes below. A hold is approximately 0.65 seconds.
