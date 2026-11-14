@@ -32,3 +32,5 @@ The isolated exported source rebuilt byte-for-byte to the bundled firmware.
 The combined instrument is GPL-3.0-or-later; individual framework, font and SDK
 components retain their original terms. See [LICENSE](LICENSE),
 [component notices](app/THIRD_PARTY.md) and [credits](app/CREDITS.md).
+
+You can also try XENOLITH in the browser, no flashing needed, in the free community [FM-1 Emulator](https://fm1-emulator.atst.tools/).
