@@ -41,7 +41,7 @@ Firmware Hub listing is claimed.
 17 November 2026: V1 defaults restored to 50% ONSET / 50% SPAN. The lamp
 behaviour and all other synthesis controls are unchanged. Matching firmware
 source is attached to the [v1.0 release](https://github.com/CaptainChronosis/XENOLITH/releases/tag/v1.0);
-the original tag archive remains the original build.
+the v1.0 tag and automatic source archives also identify the corrected build.
 
 ## Source and licences
 

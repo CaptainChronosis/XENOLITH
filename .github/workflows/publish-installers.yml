@@ -1,6 +1,6 @@
-name: Publish verified Xenolith installers
+name: Verify Xenolith V1 assets and correct source tag
 
-# Correct the existing V1 assets only when old and new hashes match the reviewed set.
+# Authorized 17 November 2026: metadata-only correction; existing assets stay intact.
 on:
   workflow_dispatch:
   push:
@@ -15,110 +15,166 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  publish:
+  verify-and-correct:
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 5
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - name: Verify and publish the V1 default correction
+      - name: Verify existing assets and correct the V1 source tag
         shell: python
         run: |
-          import hashlib
+          """One authorized V1 source-tag correction using GitHub JSON/text metadata only."""
+          import base64
           import json
           import os
           from pathlib import Path
+          import re
           import subprocess
-          import urllib.request
           
-          repo = os.environ['GITHUB_REPOSITORY']
-          if repo != 'CaptainChronosis/XENOLITH':
-              raise SystemExit('This publisher is restricted to CaptainChronosis/XENOLITH.')
-          tag = 'v1.0'
-          expected_tag = 'd74efeeebfb6f873da3d5e2b579bfabd0455af02'
-          expected = {'XENOLITH1.fwsc': '3cf3093b31f88696461dfd3bb4e366328ba0780212366715690785c9d58f2611', 'XENOLITH-Windows-updater-3cf3093b.zip': '723e81fe4a1ce16ef9c344555e8d2002b66431c9d87189e5d9815aa991000f62', 'XENOLITH-1.0-corresponding-source-3cf3093b.zip': 'dde1fbbbbb24ae87aa739aa10e08255ddc1869e8e0aab496f3cb2ddec2c5b6ac', 'XENOLITH-Windows-Portable-1.0-3cf3093b.zip': 'c2a6b4d753e34f55b8c91b92ff8a5d95a5ea04ca2123e8db252ff2bfeaef0147', 'XENOLITH-Updater-1.0-Windows-x64.exe': 'dbcd6a2acc86ba0cb9f8cae78afa5558c24451f16369e3407466216051c764ba', 'XENOLITH-Updater-1.0-Source.zip': 'fe29b82bfe17daa759a2a8221ca49e0ab2e714757f330be8c139e33927c839a4', 'XENOLITH-macOS-arm64-1.0-3cf3093b.tar.gz': 'bd57790b1d0af9fbf06742f10b9750a0a51a2b4288cb0830db4d8f7f3a735887', 'XENOLITH-macOS-x64-1.0-3cf3093b.tar.gz': 'd18a25a6a73c4c4ef20c87a1a853cdadf6ea1d444c2f50515d6d5e10210b0221', 'XENOLITH-Linux-x64-1.0-3cf3093b.tar.gz': '473531b94f9f4a8bf3d5686bae488586dc737f03bdfd68b8e7782b7677c2204d', 'XENOLITH-1.0-Installers-SHA256SUMS.txt': 'b45fdd642e919de1b5f37d1e7cf620817b33c0458ff6f89e49cd3c8ac567876c', 'SHA256SUMS.txt': 'b45fdd642e919de1b5f37d1e7cf620817b33c0458ff6f89e49cd3c8ac567876c'}
-          old_assets = {'SHA256SUMS.txt': 'e6ea7266accc3a61fd430f60a9abb12792ee70c1b54f8d44334f3ddae655e4e6', 'XENOLITH-1.0-Installers-SHA256SUMS.txt': '0da0b70a6b589d721e7f85cd92b702c3cc9c6a12340a2b9e6c33b3960bee0e4c', 'XENOLITH-Linux-x64-1.0-85079c89.tar.gz': '73efac9bf480aff3d0a313ee4460ace7d091cc2126272ba4437e1746d0c1951d', 'XENOLITH-macOS-arm64-1.0-85079c89.tar.gz': '64c8166f4b7e35f040f0c46a8adfc8bd7e86c3180393ddc09a15a81a90f5377e', 'XENOLITH-macOS-x64-1.0-85079c89.tar.gz': 'd3618abc00447a09859c33e238167a6661934bc13c7db8077a1e2f796a95dd1f', 'XENOLITH-Updater-1.0-Source.zip': 'd79d6abe926e812ff2dd6cedc743a177a3980950a97e71cf5d46f9b53010dae6', 'XENOLITH-Updater-1.0-Windows-x64.exe': '265043f92ad7e8f578ddfe61ec4d4329e1648191013379e285eb61b432b8d1e5', 'XENOLITH-Windows-updater-85079c89.zip': '6e6a59b8a8cb2dc68c82ac38d22504a5f81a2f387f64ae328fd4c8f4b04280b7', 'XENOLITH1.fwsc': '85079c89d3e7f53abdb1bc5017f9acd7a66de0f41dc0d581bd9a44ab1702641e'}
-          obsolete = ['XENOLITH-Linux-x64-1.0-85079c89.tar.gz', 'XENOLITH-Windows-updater-85079c89.zip', 'XENOLITH-macOS-arm64-1.0-85079c89.tar.gz', 'XENOLITH-macOS-x64-1.0-85079c89.tar.gz']
-          old_notes = '[XX29 / downloads and field manual](https://xx29.org/)\n\nThe installers below contain the unchanged Xenolith V1 firmware, a private Python runtime, corresponding source and component notices. No separate Python installation is needed.\n\n- Windows x64: single unsigned EXE. Physically tested on one FM-1 on 16 November 2026; all 17 saved objects matched before and after. Sixteen offline launcher checks passed.\n- macOS Apple Silicon / Intel and Linux x64: experimental packages. Archive checks and 19 shared wrapper checks passed; native execution and hardware testing have not been done. macOS packages are not notarized.\n\nA compatible USB-MIDI update loader is required; there is no blanket V15 prerequisite. Compatibility depends on the installed firmware and device revision. Transfer/restart identity verification is not installed-binary hash readback.\n\nUse XENOLITH-1.0-Installers-SHA256SUMS.txt for the new installers. The original firmware, checksum file and legacy Windows updater remain available.\n'
-          new_notes = "[XX29 / downloads and field manual](https://xx29.org/)\n\n17 November 2026 — V1 factory LOAD defaults restored to **50% ONSET / 50% SPAN**. The accepted lamp flicker and all other synthesis behaviour are unchanged. All firmware and installer downloads attached below contain the corrected `3cf3093b` build. Public naming remains **XENOLITH V1 / v1.0**.\n\nThe installers include a private Python runtime, corresponding source and component notices; no separate Python installation is needed. The legacy Windows ZIP still requires Python 3.12.\n\n- Windows x64: single unsigned EXE. The installer path was physically tested on one FM-1 on 16 November. The corrected firmware was installed and checked on 17 November, with all 17 saved objects identical before and after. The rebuilt EXE has fresh offline launcher checks; this correction does not imply a new round-trip test through every firmware.\n- macOS ARM64 / Intel and Linux x64: experimental packages. Archive and shared-wrapper checks passed; native execution and hardware testing have not been done. macOS packages are not notarized.\n\nA compatible USB-MIDI update loader is required; there is no blanket V15 prerequisite. Compatibility depends on the installed firmware and device revision. Transfer/restart identity verification is not installed-binary hash readback.\n\nUse `SHA256SUMS.txt` for all current assets. The complete matching firmware source is **XENOLITH-1.0-corresponding-source-3cf3093b.zip**, independently rebuilt byte-for-byte to the firmware. The original `v1.0` tag has not moved: GitHub's automatic “Source code” archives below still describe the original 60/40 build. Current `main` contains the corrected source and firmware.\n\nPreviously downloaded offline installers retain their original firmware; download a fresh copy for this correction.\n"
+          REPOSITORY = "CaptainChronosis/XENOLITH"
+          TAG = "v1.0"
+          RELEASE_ID = 439928631
+          RELEASE_NAME = "XENOLITH V1"
+          ORIGINAL_COMMIT = "d74efeeebfb6f873da3d5e2b579bfabd0455af02"
+          FIRMWARE_SHA256 = "3cf3093b31f88696461dfd3bb4e366328ba0780212366715690785c9d58f2611"
+          FIRMWARE_BLOB = "b1f627025733ef3fe43bd0565b2c2b8a486072af"
+          EXPECTED = {'XENOLITH1.fwsc': '3cf3093b31f88696461dfd3bb4e366328ba0780212366715690785c9d58f2611', 'XENOLITH-Windows-updater-3cf3093b.zip': '723e81fe4a1ce16ef9c344555e8d2002b66431c9d87189e5d9815aa991000f62', 'XENOLITH-1.0-corresponding-source-3cf3093b.zip': 'dde1fbbbbb24ae87aa739aa10e08255ddc1869e8e0aab496f3cb2ddec2c5b6ac', 'XENOLITH-Windows-Portable-1.0-3cf3093b.zip': 'c2a6b4d753e34f55b8c91b92ff8a5d95a5ea04ca2123e8db252ff2bfeaef0147', 'XENOLITH-Updater-1.0-Windows-x64.exe': 'dbcd6a2acc86ba0cb9f8cae78afa5558c24451f16369e3407466216051c764ba', 'XENOLITH-Updater-1.0-Source.zip': 'fe29b82bfe17daa759a2a8221ca49e0ab2e714757f330be8c139e33927c839a4', 'XENOLITH-macOS-arm64-1.0-3cf3093b.tar.gz': 'bd57790b1d0af9fbf06742f10b9750a0a51a2b4288cb0830db4d8f7f3a735887', 'XENOLITH-macOS-x64-1.0-3cf3093b.tar.gz': 'd18a25a6a73c4c4ef20c87a1a853cdadf6ea1d444c2f50515d6d5e10210b0221', 'XENOLITH-Linux-x64-1.0-3cf3093b.tar.gz': '473531b94f9f4a8bf3d5686bae488586dc737f03bdfd68b8e7782b7677c2204d', 'XENOLITH-1.0-Installers-SHA256SUMS.txt': 'b45fdd642e919de1b5f37d1e7cf620817b33c0458ff6f89e49cd3c8ac567876c', 'SHA256SUMS.txt': 'b45fdd642e919de1b5f37d1e7cf620817b33c0458ff6f89e49cd3c8ac567876c'}
+          OLD_PARAGRAPH = "Use `SHA256SUMS.txt` for all current assets. The complete matching firmware source is **XENOLITH-1.0-corresponding-source-3cf3093b.zip**, independently rebuilt byte-for-byte to the firmware. The original `v1.0` tag has not moved: GitHub's automatic “Source code” archives below still describe the original 60/40 build. Current `main` contains the corrected source and firmware."
+          NEW_PARAGRAPH = "Use `SHA256SUMS.txt` for all current assets. The complete matching firmware source is **XENOLITH-1.0-corresponding-source-3cf3093b.zip**, independently rebuilt byte-for-byte to the firmware. On 17 November 2026, the `v1.0` tag was corrected to the matching 50/50 source. GitHub's automatic source archives now describe the corrected build. The original 60/40 commit remains in repository history. Public naming remains XENOLITH V1 / v1.0."
           
-          def gh(*args):
-              return subprocess.check_output(['gh', *args], text=True)
           
-          def api(path):
-              return json.loads(gh('api', f'repos/{repo}/{path}'))
+          def require(condition, message):
+              if not condition:
+                  raise SystemExit(message)
           
-          def digest(path):
-              with path.open('rb') as stream:
-                  return hashlib.file_digest(stream, 'sha256').hexdigest()
           
-          before = api(f'releases/tags/{tag}')
-          if before['draft'] or before['tag_name'] != tag:
-              raise SystemExit('Expected the existing published v1.0 release.')
-          if api(f'git/ref/tags/{tag}')['object']['sha'] != expected_tag:
-              raise SystemExit('The original v1.0 tag has changed; refusing publication.')
-          if before.get('body', '') not in (old_notes, new_notes):
-              raise SystemExit('Release notes changed since preparation; preserve and review them.')
+          def api(path, method="GET", payload=None):
+              # No release asset/body endpoints, octet-stream requests or remote URL fetches.
+              command = ["gh", "api", "--method", method,
+                         "-H", "Accept: application/vnd.github+json",
+                         "-H", "X-GitHub-Api-Version: 2026-03-10",
+                         f"repos/{REPOSITORY}/{path}"]
+              if payload is not None:
+                  command += ["--input", "-"]
+              result = subprocess.run(command, input=None if payload is None else json.dumps(payload),
+                                      capture_output=True, text=True, check=True)
+              return json.loads(result.stdout)
           
-          directory = Path('verified-installers')
-          directory.mkdir(exist_ok=True)
-          # Fetch and verify the entire coherent replacement set before release mutation.
-          for name, sha in expected.items():
-              path = directory / name
-              source_name = 'XENOLITH-1.0-Installers-SHA256SUMS.txt' if name == 'SHA256SUMS.txt' else name
-              urllib.request.urlretrieve(f'https://xx29.org/downloads/{source_name}', path)
-              if digest(path) != sha:
-                  raise SystemExit(f'Checksum mismatch: {name}')
-              print(f'Verified {name}: {sha}', flush=True)
           
-          existing = {asset['name']: asset for asset in before['assets']}
-          for name, asset in existing.items():
-              if name not in expected and name not in obsolete:
-                  raise SystemExit(f'Unreviewed release asset appeared: {name}')
-              actual = asset.get('digest')
-              if not actual:
-                  downloaded = directory / ('previous-' + name)
-                  urllib.request.urlretrieve(asset['browser_download_url'], downloaded)
-                  actual = 'sha256:' + digest(downloaded)
-              allowed = {old_assets.get(name), expected.get(name)} - {None}
-              if actual.removeprefix('sha256:') not in allowed:
-                  raise SystemExit(f'Existing asset differs from the reviewed old/new bytes: {name}')
+          def text_file(path, ref):
+              item = api(f"contents/{path}?ref={ref}")
+              require(item.get("type") == "file" and item.get("encoding") == "base64",
+                      f"Expected a small source file: {path}")
+              require(item.get("size", 100001) <= 100000, f"Source file too large: {path}")
+              return base64.b64decode(item["content"]).decode("utf-8").replace("\r\n", "\n")
           
-          for name, sha in expected.items():
-              asset = existing.get(name)
-              if asset and asset.get('digest') == 'sha256:' + sha:
-                  print(f'Already correct: {name}', flush=True)
-                  continue
-              args = ['release', 'upload', tag, str(directory / name), '--repo', repo]
-              if asset:
-                  # Only reviewed stable filenames may be replaced; old hash-named files
-                  # are retired separately after all replacements have been verified.
-                  args.append('--clobber')
-              gh(*args)
-              print(f'Published {name}', flush=True)
           
-          published = {asset['name']: asset for asset in api(f'releases/tags/{tag}')['assets']}
-          for name, sha in expected.items():
-              if published[name].get('digest') != 'sha256:' + sha:
-                  raise SystemExit(f'Published digest mismatch: {name}')
+          def commit_ref(ref):
+              item = api(f"git/ref/{ref}")
+              require(item.get("ref") == "refs/" + ref and item["object"]["type"] == "commit",
+                      f"Expected a direct commit reference: {ref}")
+              return item["object"]["sha"]
           
-          for name in obsolete:
-              if name in published:
-                  if published[name].get('digest') != 'sha256:' + old_assets[name]:
-                      raise SystemExit(f'Historical asset changed: {name}')
-                  gh('release', 'delete-asset', tag, name, '--repo', repo, '--yes')
           
-          notes = directory / 'RELEASE_NOTES.md'
-          notes.write_text(new_notes, encoding='utf-8')
-          gh('release', 'edit', tag, '--repo', repo, '--notes-file', str(notes))
-          after = api(f'releases/tags/{tag}')
-          published = {asset['name']: asset for asset in after['assets']}
-          if set(published) != set(expected):
-              raise SystemExit('Unexpected final asset inventory.')
-          if any(published[name].get('digest') != 'sha256:' + sha for name, sha in expected.items()):
-              raise SystemExit('Final release hash verification failed.')
-          if after['name'] != before['name'] or api(f'git/ref/tags/{tag}')['object']['sha'] != expected_tag:
-              raise SystemExit('The V1 name or v1.0 tag changed during publication.')
-          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a', encoding='utf-8') as stream:
-              stream.write(f'Published and verified {len(expected)} corrected V1 assets. Original v1.0 tag retained.\n\n')
-              stream.write('\n'.join(f'- `{name}`: `{sha}`' for name, sha in expected.items()) + '\n')
+          def verify_release(release):
+              require(release.get("id") == RELEASE_ID and release.get("name") == RELEASE_NAME
+                      and release.get("tag_name") == TAG and release.get("draft") is False
+                      and release.get("prerelease") is False, "Unexpected V1 release identity/state.")
+              assets = release.get("assets", [])
+              require(len(assets) == len(EXPECTED) == 11, "Expected exactly 11 reviewed assets.")
+              by_name = {item["name"]: item for item in assets}
+              require(set(by_name) == set(EXPECTED), "Release asset names changed.")
+              for name, sha in EXPECTED.items():
+                  item = by_name[name]
+                  require(item.get("state") == "uploaded" and item.get("digest") == "sha256:" + sha,
+                          f"Missing or changed GitHub SHA-256 metadata: {name}. No binary fallback is allowed.")
+              return {name: (item["id"], item["size"], item["digest"])
+                      for name, item in by_name.items()}
+          
+          
+          def corrected_notes(body):
+              if body.count(OLD_PARAGRAPH) == 1 and NEW_PARAGRAPH not in body:
+                  return body.replace(OLD_PARAGRAPH, NEW_PARAGRAPH, 1)
+              if body.count(NEW_PARAGRAPH) == 1 and OLD_PARAGRAPH not in body:
+                  return body
+              raise SystemExit("Known source-tag paragraph is missing or ambiguous; preserve and review the notes.")
+          
+          
+          def verify_source(ref, original_source):
+              source = text_file("app/xenolith_governor.c", ref)
+              old_defaults = "(XenolithGovernorConfig){.60f,.40f,"
+              new_defaults = "(XenolithGovernorConfig){.50f,.50f,"
+              require(original_source.count(old_defaults) == 1, "Unexpected historical governor source.")
+              require(source == original_source.replace(old_defaults, new_defaults, 1),
+                      "Target governor must match the reviewed 50/50-only correction.")
+              package = json.loads(text_file("firmware/package.json", ref))
+              require(package == {"file": "XENOLITH1.fwsc", "sha256": FIRMWARE_SHA256,
+                                  "bytes": 611496, "identity": "FM-1_29000"},
+                      "Target firmware manifest changed.")
+              commit = api(f"git/commits/{ref}")
+              tree = api(f"git/trees/{commit['tree']['sha']}")
+              require(not tree.get("truncated", False), "Truncated root tree.")
+              firmware = [entry for entry in tree["tree"]
+                          if entry["path"] == "firmware" and entry["type"] == "tree"]
+              require(len(firmware) == 1, "Missing firmware source-tree directory.")
+              entries = api(f"git/trees/{firmware[0]['sha']}")
+              require(not entries.get("truncated", False), "Truncated firmware tree.")
+              binary = [entry for entry in entries["tree"] if entry["path"] == "XENOLITH1.fwsc"]
+              require(len(binary) == 1 and binary[0].get("type") == "blob"
+                      and binary[0].get("sha") == FIRMWARE_BLOB and binary[0].get("size") == 611496,
+                      "Repository firmware blob is not the previously verified corrected package.")
+          
+          
+          def main():
+              require(os.environ.get("GITHUB_REPOSITORY") == REPOSITORY, "Wrong repository.")
+              require(os.environ.get("GITHUB_REF") == "refs/heads/main", "Run only from main.")
+              require(os.environ.get("GITHUB_EVENT_NAME") in ("push", "workflow_dispatch"), "Unexpected trigger.")
+              target = os.environ.get("GITHUB_SHA", "")
+              require(re.fullmatch(r"[0-9a-f]{40}", target) is not None, "Invalid triggering commit.")
+              require(target != ORIGINAL_COMMIT, "The original source is not the corrected target.")
+              require(commit_ref("heads/main") == target, "main advanced; run the current workflow commit.")
+              before = api(f"releases/tags/{TAG}")
+              asset_snapshot = verify_release(before)
+              before_body = before.get("body") or ""
+              after_body = corrected_notes(before_body)
+              previous_tag = commit_ref(f"tags/{TAG}")
+              require(previous_tag in (ORIGINAL_COMMIT, target), "v1.0 moved to an unreviewed commit.")
+              comparison = api(f"compare/{ORIGINAL_COMMIT}...{target}?per_page=1")
+              require(comparison.get("status") == "ahead"
+                      and comparison.get("merge_base_commit", {}).get("sha") == ORIGINAL_COMMIT,
+                      "Original 60/40 commit must remain an ancestor of corrected main.")
+              original_source = text_file("app/xenolith_governor.c", ORIGINAL_COMMIT)
+              verify_source(target, original_source)
+          
+              # Re-read mutable metadata immediately before the only authorized writes.
+              require(commit_ref("heads/main") == target, "main changed during verification.")
+              current = api(f"releases/tags/{TAG}")
+              require(verify_release(current) == asset_snapshot, "Release assets changed during verification.")
+              require((current.get("body") or "") == before_body, "Release notes changed; refusing to overwrite them.")
+              require(commit_ref(f"tags/{TAG}") == previous_tag, "Tag changed during verification.")
+              if previous_tag == ORIGINAL_COMMIT:
+                  moved = api(f"git/refs/tags/{TAG}", "PATCH", {"sha": target, "force": True})
+                  require(moved.get("object", {}).get("sha") == target, "Tag correction was not confirmed.")
+              require(commit_ref(f"tags/{TAG}") == target, "Tag does not identify corrected source.")
+              if after_body != before_body:
+                  current = api(f"releases/tags/{TAG}")
+                  require(verify_release(current) == asset_snapshot, "Assets changed after tag correction.")
+                  require((current.get("body") or "") == before_body, "Notes changed after tag correction; preserved.")
+                  api(f"releases/{RELEASE_ID}", "PATCH", {"body": after_body})
+          
+              final = api(f"releases/tags/{TAG}")
+              require(verify_release(final) == asset_snapshot, "Final asset metadata changed.")
+              require((final.get("body") or "") == after_body, "Final release notes do not match the limited edit.")
+              require(commit_ref(f"tags/{TAG}") == target, "Final tag verification failed.")
+              verify_source(target, original_source)
+              summary = (f"Corrected v1.0 source tag on 17 November 2026 to `{target}`.\n\n"
+                         f"Original commit `{ORIGINAL_COMMIT}` remains in main history.\n\n"
+                         "Verified all 11 existing release asset SHA-256 digests from GitHub metadata; "
+                         "asset IDs and sizes are unchanged. No binaries downloaded or uploaded.\n")
+              Path(os.environ["GITHUB_STEP_SUMMARY"]).write_text(summary, encoding="utf-8")
+              print(summary)
+          
+          
+          if __name__ == "__main__":
+              main()

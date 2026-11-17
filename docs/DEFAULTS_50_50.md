@@ -12,9 +12,11 @@ The corrected firmware was installed and checked on one FM-1 on 17 November;
 all 17 saved objects matched before and after. This does not establish hardware
 qualification for every FM-1 revision or native macOS/Linux installation.
 
-Public naming remains V1 / v1.0. The original v1.0 tag is unchanged; its GitHub
-automatic Source code archives describe the original 60/40 build. Use the
-attached `XENOLITH-1.0-corresponding-source-3cf3093b.zip` for the corrected
-firmware. Current main also contains the corrected source and firmware.
+Public naming remains V1 / v1.0. On 17 November 2026, the v1.0 tag was
+corrected to the matching 50/50 source, as required for the Firmware Hub's
+source mirror. Its automatic source archives and the attached
+`XENOLITH-1.0-corresponding-source-3cf3093b.zip` both describe the corrected
+firmware. The original 60/40 commit remains in repository history:
+`d74efeeebfb6f873da3d5e2b579bfabd0455af02`.
 Already-downloaded offline installers retain their old payload; download a
 fresh installer to obtain this correction.
