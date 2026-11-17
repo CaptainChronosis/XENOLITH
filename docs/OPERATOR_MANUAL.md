@@ -539,7 +539,7 @@ FILTER, REVERB and VCA BIAS. SELECT press opens timing: ONSET / SPAN / RECOVER /
 CURVE. Hold REC while inside LOAD to reach the core controls; SELECT press then
 alternates table erosion and cell/link/clock limits. HOME exits without recording.
 
-New defaults are ONSET 60%, SPAN 40 percentage points, RECOVER 250ms and VCA BIAS
+New defaults are ONSET 50%, SPAN 50 percentage points, RECOVER 250ms and VCA BIAS
 -15%. ONSET covers0-100%; SPAN independently covers5-50 percentage points.
 A very small colour precursor rises
 through the ten percentage points immediately below ONSET; below that it returns

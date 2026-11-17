@@ -21,9 +21,10 @@ or Internet connection is required to use them.
 
 The macOS and Linux packages are **experimental**. Archive checks and 19 shared
 wrapper checks passed on Windows; native execution and hardware testing on
-those platforms have not been done. The Windows EXE passed 16 offline launcher
-checks and a physical installation on one FM-1 on 16 November 2026, with all
-17 saved objects identical before and after. This does not qualify every host
+those platforms have not been done. The Windows launcher passed 16 offline checks. Its installation path was
+physically tested on one FM-1 on 16 November 2026, with all 17 saved objects
+identical before and after. The corrected 50/50 firmware was installed and
+checked on that FM-1 on 17 November, again preserving all saved objects. This does not qualify every host
 setup or FM-1 revision. The newer UC25HQ80 chip is recognized but has not been
 tested on physical hardware.
 
@@ -63,7 +64,7 @@ this opens no MIDI devices.
 
 ## Legacy Windows ZIP / repository scripts
 
-The original [Windows updater ZIP](downloads/XENOLITH-Windows-updater-85079c89.zip)
+The [Windows updater ZIP](downloads/XENOLITH-Windows-updater-3cf3093b.zip)
 and the repository's BAT scripts still require Python 3.12 with the Windows
 `py` launcher. Extract the ZIP completely, run `Setup updater.bat` once, then
 `Update.bat`. Setup explicitly uses 3.12 and installs prebuilt packages into

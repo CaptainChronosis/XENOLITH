@@ -17,7 +17,7 @@ static float ramp(float x,float lo,float hi) {
 }
 
 void xenolith_governor_defaults(XenolithGovernorConfig *c) {
-    if(c)*c=(XenolithGovernorConfig){.60f,.40f,250.0f,1.0f,1.0f,-.15f,1.0f,0.0f,0.0f,1.0f,0.0f,.375f,1.0f};
+    if(c)*c=(XenolithGovernorConfig){.50f,.50f,250.0f,1.0f,1.0f,-.15f,1.0f,0.0f,0.0f,1.0f,0.0f,.375f,1.0f};
 }
 int xenolith_governor_config_valid(const XenolithGovernorConfig *c) {
     return c&&within(c->onset,0.0f,1.0f)&&within(c->span,.05f,.50f)
